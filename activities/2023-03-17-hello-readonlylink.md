@@ -8,4 +8,4 @@ date: 2023-03-17 16:43+08:00
 
 这是我的作者连接：
 
-<readonlylink href="https://inner.xieyuheng.com/author.json" />
+<readonlylink href="https://studium.xieyuheng.com/author.json" />

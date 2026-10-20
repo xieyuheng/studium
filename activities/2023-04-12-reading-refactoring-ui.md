@@ -7,4 +7,4 @@ date: 2023-04-12 20:31+08:00
 
 这里是我的 Mimor 笔记：
 
-<readonlylink href="https://inner.xieyuheng.com/persons/adam-wathan/refactoring-ui.md" />
+<readonlylink href="https://studium.xieyuheng.com/persons/adam-wathan/refactoring-ui.md" />

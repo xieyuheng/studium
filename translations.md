@@ -6,8 +6,8 @@
 
 ![A translation circle taken from wikipedia](assets/images/wikipedia-translation.svg)
 
-<readonlylink href="https://inner.xieyuheng.com/translations/zh/a-constructivist-manifesto.md" />
-<readonlylink href="https://inner.xieyuheng.com/translations/zh/are-you-an-anarchist.md" />
-<readonlylink href="https://inner.xieyuheng.com/translations/zh/how-i-became-interested-in-foundations-of-mathematics.md" />
-<readonlylink href="https://inner.xieyuheng.com/translations/zh/is-god-a-taoist.md" />
-<readonlylink href="https://inner.xieyuheng.com/translations/zh/schizophrenia-in-contemporary-mathematics.md" />
+<readonlylink href="https://studium.xieyuheng.com/translations/zh/a-constructivist-manifesto.md" />
+<readonlylink href="https://studium.xieyuheng.com/translations/zh/are-you-an-anarchist.md" />
+<readonlylink href="https://studium.xieyuheng.com/translations/zh/how-i-became-interested-in-foundations-of-mathematics.md" />
+<readonlylink href="https://studium.xieyuheng.com/translations/zh/is-god-a-taoist.md" />
+<readonlylink href="https://studium.xieyuheng.com/translations/zh/schizophrenia-in-contemporary-mathematics.md" />

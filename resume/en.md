@@ -145,7 +145,7 @@ Prolog-like logic programming language in JavasScript and TypeScript.
 
 ## Papers
 
-2019-05-08：[A Recursive Combinatorial Description of cell-complex](https://readonly.link/articles/https://inner.xieyuheng.com/papers/publish/a-recursive-combinatorial-description-of-cell-complex.md)
+2019-05-08：[A Recursive Combinatorial Description of cell-complex](https://readonly.link/articles/https://studium.xieyuheng.com/papers/publish/a-recursive-combinatorial-description-of-cell-complex.md)
 
 2016-06-14: Function compose, Type cut, and The algebra of logic
 
