@@ -1,0 +1,33 @@
+# studium curation
+
+0 首页 homepage.md
+
+1 我喜欢 i-like.md
+1 我不知道 i-dont-know.md
+
+1 信念 beliefs/000-knowledge-is-fixation-of-belief.md
+2 好代码易于修改 beliefs/001-good-code-is-easy-to-change.md
+2 实现与教学 beliefs/002-learn-by-implementing-and-teaching.md
+2 递归下降解析器 beliefs/003-recursive-decent-parser-is-the-best.md
+
+1 笔记 notes/0000-zettelkasten.md
+2 类型论的原则 notes/0001-the-principle-of-type-theory.md
+2 类型系统的目的 notes/0008-the-aim-of-a-type-system.md
+2 为什么Lisp对我重要 notes/0029-why-lisp-matters-to-me.md
+2 好代码的原则 notes/0037-the-principle-of-good-code.md
+
+1 语言与实现 langs/lisp/learning-lisp.md
+2 思考Forth langs/forth/thinking-forth.md
+
+1 逻辑与类型 topics/logic/linear-logic.md
+2 类型论 topics/type-theory/index.md
+3 类型作为游戏 topics/type-theory/type-as-game.md
+
+1 项目 projects/README.md
+2 蝉语设计 design/cicada-forth/README.md
+
+1 日记 diary/2026-09-08-论语言的本质.md
+2 结构主义 diary/2026-08-14-结构主义.md
+
+1 阅读清单 rabbit-holes.md
+1 格言 quotes.md
