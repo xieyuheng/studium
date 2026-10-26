@@ -6,6 +6,17 @@ cover-image:
   alt: red lisp logo
 ---
 
+- [问题](#问题)
+- [什么是 LISP](#什么是-lisp)
+  - [逻辑式语言](#逻辑式语言-minikanren)
+  - [依值类型系统](#依值类型系统-pie)
+  - [代数数据类型](#代数数据类型-algebra-data-type)
+- [编程语言的设计语言](#编程语言的设计语言)
+- [美学流派](#美学流派)
+  - [极简](#极简-scheme)
+  - [现代](#现代-clojure)
+  - [形式极简](#形式极简-calcit)
+
 # 问题
 
 我想要设计很多形式语言，
@@ -13,9 +24,10 @@ cover-image:
 
 比如：
 
-- Curry 的组合子模型（Combinatory Logic）
-- Sussman 的[传播子模型（Propagator Model）](https://github.com/xieyuheng/propagator.js)
 - Lafont 的[反应网模型（Interaction Nets）](https://github.com/xieyuheng/inet-lisp)
+- Sussman 的[传播子模型（Propagator Model）](https://github.com/xieyuheng/propagator.js)
+- Curry 的组合子模型（Combinatory Logic）
+- [机器学习（Machine Learning）](https://github.com/xieyuheng/learner.js)
 - Milner 的 π 演算（π Calculus）
 - [逻辑式编程（Logic Programming）](https://github.com/xieyuheng/chimera)
 - 线性逻辑（Linear Logic）
@@ -57,7 +69,8 @@ LISP 不是一个单一的编程语言，
 简洁优雅地设计 LISP 语法，
 已经到了信手拈来的程度。
 
-下面我带你看一下 LISP 语法设计的例子，
+下面我带你走马观花，
+看一下 LISP 语法设计的例子。
 重点不在于理解具体的语法，
 而在于体会这个「信手拈来」。
 
@@ -158,14 +171,15 @@ Dan 和 David 在 "The Little Typer" 一书中，
 ```
 
 下面用数学归纳法证明
-`double` 与 `twice` 这两个函数等价：
+`double` 与 `twice` 这两个函数，
+虽然定义方式不同，但是行为等价：
 
 - `->` -- 函数类型。
 - `Pi` -- 依赖函数类型。
 - `=` -- 等价类型。
 - `the` -- 局部的类型声明语法。
   起源于 common-lisp 的语法，
-  灵感来自英文的同位语结构（Apposition），
+  灵感来自英文的「同位语」（Apposition），
   比如："The capital of France, Paris, is a beautiful city."
 - `cong` & `replace` -- 两个用来表达「等量代换」的语法。
 
@@ -227,9 +241,197 @@ Dan 和 David 在 "The Little Typer" 一书中，
       step-twice=double)))
 ```
 
+在 "The Little Typer" 一书的附录 "The Way Forward" 中，
+有几页纸最能体现「信手拈来」的感觉。
+在这篇附录里作者想要介绍，
+如何实现正文之外的更多语言功能。
+
+想要实现「归纳数据类型」（Inductive Datatypes），
+可以这样设计语法：
+
+```scheme
+(data List ((E U)) ()
+  (nil ()
+    (List E))
+  (:: ((e E) (es (List E)))
+    (List E))
+  ind-List)
+
+(data Less-Than () ((j Nat) (k Nat))
+  (zero-smallest ((n Nat))
+    (Less-Than zero (add1 n)))
+  (add1-smaller ((j Nat)
+                 (k Nat)
+                 (j<k (Less-Than j k))))
+    (Less-Than (add1 j) (add1 k))
+  ind-Less-Than)
+```
+
+想要实现带有「模式匹配」（Pattern Matching）
+的「递归函数」（Recursive Functions），
+可以这样设计语法：
+
+```scheme
+(claim length
+  (Pi ((E Nat))
+      (-> (List E) Nat)))
+(define length
+  (lambda (E es)
+    (match es
+      (nil zero)
+      ((:: x xs) (addl (length xs))))))
+
+(claim front
+  (Pi ((E U)
+       (n Nat))
+      (-> (Vec E (addl n)) E)))
+(define front
+  (lambda (E n es)
+    (match es
+      ((vec:: x xs) x))))
+```
+
+想要实现「隐式参数」（Implicit Arguments），
+可以这样设计语法：
+
+- 其中 `Pi*` 和 `lambda*` 用来引入隐式参数。
+
+```scheme
+(claim length
+  (Pi* ((E U))
+      (-> (List E) Nat)))
+(define length
+  (lambda* (E)
+    (lambda (es)
+      (rec-List es
+        0
+        (lambda (e es l)
+           (addl l))))))
+```
+
+不写第一个隐式参数的表达式：
+
+```scheme
+(length (:: 'potato (:: 'gravy nil)))
+```
+
+等价于：
+
+- 在不使用隐式参数的情况下，完整的函数作用表达式。
+
+```scheme
+(length Atom (:: 'potato (:: 'gravy nil)))
+```
+
+表达式：
+
+- 这里 `implicitly` 是专门给函数提供隐式参数的新语法。
+
+```scheme
+(implicitly length Atom)
+```
+
+等价于：
+
+```scheme
+(-> (List Atom) Nat)
+```
+
+想要支持「证明策略」（Proof Tactics），
+可以这样设计语法：
+
+```scheme
+(claim even-or-odd
+  (Pi ((n Nat))
+      (Either (Even n) (Odd n))))
+(define-tactically even-or-odd
+  (intro n)
+  (elim n)
+  (apply zero-is-even)
+  (intro n-1 e-or-o.n-i)
+  (elim e-or-o.n-i)
+  (then
+   right
+   (apply addl-odd->odd)
+   auto)
+  (then
+   left
+   (apply addl-odd->even)
+   auto))
+```
+
+> Each pattern sits at the center of a network of connections which connect it to certain other patterns that help to complete it... And it is the network of these connections that forms the language.
+>
+> -- Christopher Alexander, The Timeless Way of Building (1979)
+
 ## 代数数据类型 / Algebra Data Type
 
-TODO
+`define-record-type` 是 scheme 语法设计的典范。
+其根源可以追溯到 [Scheme 48](https://s48.org)，
+通过 [SRFI-9](https://srfi.schemers.org/srfi-9/srfi-9.html) 实现标准化。
+
+例如：
+
+```scheme
+(define-record-type point
+  (make-point x y)
+  point?
+  (x point-x point-set-x!)
+  (y point-y point-set-y!))
+```
+
+其语法设计为：
+
+```scheme
+(define-record-type <record-name>
+  (<constructor> <field-tag> ...)
+  <predicate>
+  (<field-tag> <accessor> [<modifier>])
+  ...)
+```
+
+这种设计避免了把所有信息都一股脑地表达出来，
+而是用 `<field-tag>` 作为名字，
+把 field 的信息串起来。
+
+`(<constructor> <field-tag> ...)`
+相当于定义了一些名为 `<field-tag>` 的变量。
+而后续的 `(<field-tag> <accessor> [<modifier>])`
+定义了这些变量的属性。
+
+具体来说，就是先声明 `x` `y`
+是两个 record 内部使用的变量，
+然后再在后续的语句中定义这两个变量的属性：
+
+```scheme
+  (x point-x point-set-x!)
+  (y point-y point-set-y!)
+```
+
+以 `define-record-type` 为范式，
+可以推广出定义代数数据类型的显式（Explicit）语法：
+
+```meta-lisp
+(define-algebraic-type (my-list-t E)
+  ((nil)
+   nil?)
+  ((li (head E) (tail (my-list-t E)))
+   li?
+   (head li-head li-put-head!)
+   (tail li-tail li-put-tail!)))
+```
+
+对应的隐式（Implicit）语法可以设计为：
+
+```meta-lisp
+(define-enum (my-list-t E)
+  (nil)
+  (li (head E) (tail (my-list-t E))))
+```
+
+> Thus, as in the case of natural languages, the pattern language is generative.
+>
+> -- Christopher Alexander, The Timeless Way of Building (1979)
 
 # 编程语言的设计语言
 
@@ -244,7 +446,7 @@ TODO
 LISP 对于形式语言设计，也是如此。
 LISP 因此成为了一种编程语言的设计语言。
 
-一种模式语言（Pattern Language）。
+一种模式语言（Pattern Language）：
 
 > Each pattern describes a problem which occurs over and over again in our environment, and then describes the core of the solution to that problem, in such a way that you can use this solution a million times over, without ever doing it the same way twice.
 >
@@ -257,16 +459,35 @@ LISP 因此成为了一种编程语言的设计语言。
 首先，设计不是为了好看，是为了解决问题的。
 
 语法设计所解决的问题是：
-如何用文本的表面的形式差异，
-来表达语义差异。
+
+> 如何用文本形式上的差异，
+> 来表达语义差异。
 
 早期 LISP 的每一个语法设计，
-都是为了解决一个新的语义差异的表达问题。
+都是为了解决一个「表达语义差异」问题。
 
-比如 TODO
+比如，`define` 解决了在程序顶层做定义的问题，
+下列语法就都有样学样，来在顶层做定义：
+
+```scheme
+define
+claim
+define-record-type
+define-algebraic-type
+define-struct
+define-enum
+define-tactically
+```
+
+`lambda` 解决了在匿名表达式中，
+引入约束变量（Bound Variable）的问题：
+
+```scheme
+(lambda (n) (add n 1))
+```
 
 以 `lambda` 为范式，
-下列语法都是在引入新的约束变量（Bound Variable）：
+下列语法都是在引入新的约束变量：
 
 ```scheme
 (lambda (<name> ...) <body>)
@@ -275,8 +496,16 @@ LISP 因此成为了一种编程语言的设计语言。
 (run <count> (<name>) <body>)
 ```
 
+`let` 解决了引入变量名与值的绑定（Binding）问题：
+
+```scheme
+(let ((x 1)
+      (y 2))
+  (add x y))
+```
+
 以 `let` 为范式，
-下列语法都是在引入新的变量与值的绑定（Binding）：
+下列语法都是在引入变量名与值的绑定：
 
 ```scheme
 (let ((<name> <exp>) ...) <body>)
@@ -284,4 +513,141 @@ LISP 因此成为了一种编程语言的设计语言。
 (letrec ((<name> <exp>) ...) <body>)
 (Pi ((<name> <exp>) ...) <body>)
 (Sigma ((<name> <exp>) ...) <body>)
+```
+
+> There is a central quality which is the root criterion of life and spirit in a man, a town, a building, or a wilderness. This quality is objective and precise, but it cannot be named.
+>
+> -- Christopher Alexander
+
+# 美学流派
+
+哪里有人群，哪里就有分歧。
+人们在设计方面的分歧可以被称为「美学流派」。
+在语法设计方面也是如此。
+
+上面在介绍基于 LISP 的语法设计时，
+其实我只介绍了其中一个美学流派。
+也就是我所遵从的「极简主义」流派。
+
+下面我多介绍几个。
+给我所说的「历史上有大量的 LISP 语言设计实践」，
+多添一些佐证。
+
+## 极简 / Scheme
+
+这个流派的特点是：
+
+- 追求高度一致性。
+- 保持克制，不使用 `()` 之外的其他括号，
+  比如 `[]` 和 `{}`。
+- 使用易读的词。
+  比如：
+  - `define` 而不是 `def`
+  - `lambda` 而不是 `fn`
+  - `add1` 而不是 `succ`
+
+## 现代 / Clojure
+
+在 `()` 之外，也利用 `[]` 和 `{}` 来表达语义差异：
+
+```clojure
+[1 2 3]
+
+{:host "localhost"
+ :port 8080}
+```
+
+尽量减少括号。
+
+比如相比 scheme `let` 和 `cond`：
+
+```scheme
+(let ((a 1)
+      (b 2))
+  (+ a b))
+
+(cond
+  ((> x 0) "positive")
+  ((< x 0) "negative")
+  (else    "zero"))
+```
+
+少了用来表达「对子」的括号：
+
+- 这与使用 `{}` 来表达键值对相呼应。
+
+```clojure
+(let [a 1
+      b 2]
+  (+ a b))
+
+(cond
+  (> x 0) "positive"
+  (< x 0) "negative"
+  :else   "zero")
+```
+
+大胆使用缩写：
+
+- `def`
+- `fn`
+- `defn`
+- `str`
+- `conj`
+- `disj`
+
+大胆融合 Java 语法：
+
+```clojure
+(java.util.Date.)
+(java.net.URI. "http://clojure.org")
+
+(doto (JFrame. "Celsius Converter")
+  (.setSize 300 80)
+  (.setVisible true))
+```
+
+## 形式极简 / Calcit
+
+在 [Calcit](https://github.com/calcit-lang/calcit) 语言中，
+设计出了一种很好的基于缩进的 LISP 语法。
+
+几乎能够去掉所有括号。
+
+规则只有两条：
+
+- 「换行 + 缩进」表示「向下嵌套一层列表，
+  更深的行是上一行尾部的子表达式」；
+- `$` 在行内起到同样的作用，
+  等价于「开括号并把后续内容放到下一层」。
+
+例如：
+
+```calcit-lang
+defn fib (n)
+  if (< n 2) 1 $ +
+    fib $ - n 1
+    fib $ - n 2
+```
+
+等价于：
+
+```calcit-lang
+defn fib (n)
+  if (< n 2)
+    1
+    +
+      fib $ - n 1
+      fib $ - n 2
+```
+
+等价于：
+
+```meta-lisp
+(defn fib (n)
+  (if (< n 2)
+    1
+    (+
+      (fib (- n 1))
+      (fib (- n 2)))))
 ```
