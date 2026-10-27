@@ -1,3 +1,3 @@
-# 个人博物馆 / Personal Museum
+# 慕学 / Studium
 
 [ [MUSEUM](https://museum.xieyuheng.com) ]
