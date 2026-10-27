@@ -1,15 +1,3 @@
-> 唯夫蝉之清素兮，潜厥类乎太阴
-> 在炎阳之仲夏兮，始游豫乎芳林
->
-> ——曹植《蝉赋》
+# 个人博物馆 / Personal Museum
 
-# 十月
-
-学习如何实现编程智能体，
-并实现一个自己的 [风铃智能体](https://windbell.xieyuheng.com)。
-
-# 九月
-
-经历了一年多，
-初步完成 [元语 / meta-lisp](exhibits/元语.md)，
-一个带有静态类型的极简 LISP。
+[ [MUSEUM](https://museum.xieyuheng.com) ]
