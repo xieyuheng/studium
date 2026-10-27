@@ -1,5 +1,5 @@
 ---
-title: 我为什么 LISP
+title: 我为什么 LISP？
 date: 2026-10-26
 cover-image:
   src: ../assets/images/logo/red-lisp.png
@@ -7,7 +7,8 @@ cover-image:
 ---
 
 - [问题](#问题)
-- [什么是 LISP](#什么是-lisp)
+- [什么是 LISP？](#什么是-lisp)
+  - [寄存器机](#寄存器机-register-machine)
   - [逻辑式语言](#逻辑式语言-minikanren)
   - [依值类型系统](#依值类型系统-pie)
   - [代数数据类型](#代数数据类型-algebra-data-type)
@@ -16,6 +17,7 @@ cover-image:
   - [极简](#极简-scheme)
   - [现代](#现代-clojure)
   - [形式极简](#形式极简-calcit)
+- [尾声](#尾声)
 
 # 问题
 
@@ -43,7 +45,7 @@ cover-image:
 
 LISP 就是这个问题的解决方案之一。
 
-# 什么是 LISP
+# 什么是 LISP？
 
 LISP 不是一个单一的编程语言，
 而是一个语言家族。
@@ -73,6 +75,58 @@ LISP 不是一个单一的编程语言，
 看一下 LISP 语法设计的例子。
 重点不在于理解具体的语法，
 而在于体会这个「信手拈来」。
+
+## 寄存器机 / Register Machine
+
+Sussman 和 Abelson 在 SICP 的第五章
+"Computing with Register Machines" 中，
+设计了一个描述 Register Machine 的语言。
+
+接受输入并打印最大公约数（GCD）结果的机器：
+
+```scheme
+(controller
+ gcd-loop
+   (assign a (op read))
+   (assign b (op read))
+ test-b
+   (test (op =) (reg b) (const 0))
+   (branch (label gcd-done))
+   (assign t (op rem) (reg a) (reg b))
+   (assign a (reg b))
+   (assign b (reg t))
+   (goto (label test-b))
+ gcd-done
+   (perform (op print) (reg a))
+   (goto (label gcd-loop)))
+```
+
+使用寄存器机语言描述用迭代实现的阶乘：
+
+```scheme
+(define (factorial n)
+  (define (iter product counter)
+    (if (> counter n)
+      product
+      (iter (* counter product)
+            (+ counter 1))))
+  (iter 1 1))
+```
+
+所对应的寄存器机语是：
+
+```scheme
+(define-machine factorial
+  (register n product counter)
+  (controller
+    test-counter
+      (test (op > (reg counter) (reg n)))
+      (branch (label factorial-done))
+      (assign product (op *) (reg counter) (reg product))
+      (assign counter (op +) (reg counter) (const 1))
+      (goto (label test-counter))
+    factorial-done))
+```
 
 ## 逻辑式语言 / MiniKanren
 
@@ -472,11 +526,12 @@ LISP 因此成为了一种编程语言的设计语言。
 ```scheme
 define
 claim
+define-machine
+define-tactically
 define-record-type
 define-algebraic-type
 define-struct
 define-enum
-define-tactically
 ```
 
 `lambda` 解决了在匿名表达式中，
@@ -545,6 +600,29 @@ define-tactically
   - `define` 而不是 `def`
   - `lambda` 而不是 `fn`
   - `add1` 而不是 `succ`
+
+这个流派由于化到了最简，
+所以很适合中文编程：
+
+```meta-lisp
+(模块 数学)
+
+(声明 阶乘 (-> 整数型 整数型))
+
+(定义 (阶乘 数)
+  (若 (整数小于等于 数 1)
+    1
+    (整数乘 (阶乘 (整数减 数 1)) 数)))
+
+(定义测试 阶乘测试
+  (断言相等 1 (阶乘 0))
+  (断言相等 1 (阶乘 1))
+  (断言相等 2 (阶乘 2))
+  (断言相等 6 (阶乘 3))
+  (断言相等 24 (阶乘 4))
+  (断言相等 120 (阶乘 5))
+  (断言相等 720 (阶乘 6)))
+```
 
 ## 现代 / Clojure
 
@@ -651,3 +729,18 @@ defn fib (n)
       (fib (- n 1))
       (fib (- n 2)))))
 ```
+
+# 尾声
+
+> Syntax without representation is tyranny.
+>
+> -- Sussman
+
+我为什么 LISP？
+
+因为 LISP 是一种设计语言，
+它能够把语言设计的循环缩短。
+
+> 设计、实现、再设计、再实现……
+
+我的 LISP 语言集合：[x-lisp](https://github.com/xieyuheng/x-lisp)。

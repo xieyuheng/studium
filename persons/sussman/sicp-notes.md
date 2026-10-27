@@ -45,7 +45,7 @@ year: 1996
 
 数据路径 和 控制单元 这两个概念，应该来自数字电路设计。
 
-> In order for the data paths to actually compute GCDs, the buons
+> In order for the data paths to actually compute GCDs, the buttons
 > must be pushed in the correct sequence. We will describe this
 > sequence in terms of a controller diagram.
 
@@ -112,8 +112,8 @@ data-path diagram 的另外一种视角，
 
 > Unfortunately, it is difficult to read such a description. In order
 > to understand the controller instructions we must constantly refer
-> back to the definitions of the buon names and the operation names,
-> and to understand what the buons do we may have to refer to the
+> back to the definitions of the button names and the operation names,
+> and to understand what the buttons do we may have to refer to the
 > definitions of the operation names. We will thus transform our
 > notation to combine the information from the data-path and
 > controller descriptions so that we see it all together.
