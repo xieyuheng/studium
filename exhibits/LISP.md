@@ -327,18 +327,18 @@ Dan 和 David 在 "The Little Typer" 一书中，
 
 ```scheme
 (claim length
-  (Pi ((E Nat))
+  (Pi ((E U))
       (-> (List E) Nat)))
 (define length
   (lambda (E es)
     (match es
       (nil zero)
-      ((:: x xs) (addl (length xs))))))
+      ((:: x xs) (add1 (length xs))))))
 
 (claim front
   (Pi ((E U)
        (n Nat))
-      (-> (Vec E (addl n)) E)))
+      (-> (Vec E (add1 n)) E)))
 (define front
   (lambda (E n es)
     (match es
@@ -360,7 +360,7 @@ Dan 和 David 在 "The Little Typer" 一书中，
       (rec-List es
         0
         (lambda (e es l)
-           (addl l))))))
+           (add1 l))))))
 ```
 
 不写第一个隐式参数的表达式：
@@ -406,11 +406,11 @@ Dan 和 David 在 "The Little Typer" 一书中，
   (elim e-or-o.n-i)
   (then
    right
-   (apply addl-odd->odd)
+   (apply add1-odd->odd)
    auto)
   (then
    left
-   (apply addl-odd->even)
+   (apply add1-odd->even)
    auto))
 ```
 
