@@ -1,0 +1,33 @@
+<svg
+  width="500"
+  height="500"
+  viewBox="0 0 147.9497 147.9497"
+  version="1.1"
+  xmlns="http://www.w3.org/2000/svg">
+  <!-- 黑色背景 -->
+  <rect
+    x="0"
+    y="0"
+    width="147.9497"
+    height="147.9497"
+    fill="#000000" />
+
+  <!-- 白色笔画 -->
+  <g
+    fill="none"
+    stroke="#ffffff"
+    stroke-opacity="1">
+    <path
+      stroke-width="0.88769819"
+      d="M 128.24309,112.95377 24.877154,113.34699 76.219583,23.632851 Z"
+      transform="translate(-2.8082429,-8.7367556)" />
+    <path
+      stroke-width="2.66309457"
+      d="M 112.01769,113.88985 12.998523,81.818869 90.282397,12.101243 Z"
+      transform="translate(2.4621501,5.1280384)" />
+    <path
+      stroke-width="1.77539638"
+      d="M 60.221212,51.172425 -43.617969,35.61347 21.776072,-46.534421 Z"
+      transform="translate(60.904528,61.515552)" />
+  </g>
+</svg>
