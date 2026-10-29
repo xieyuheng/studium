@@ -1,0 +1,5 @@
+# .assetsignore
+.git/
+.gitignore
+.wrangler/
+node_modules/
