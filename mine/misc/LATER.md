@@ -1,9 +1,5 @@
 # 用 AI 来完成之前的项目
 
-readonly.link
-- 模仿 xxvvii 的顶端类文件树导航
-- 总是可以做到纯静态部署 + 动态加载，
-  因为可以写工具来收集网站的地图。
 mimor
 - 验证在 markdown 中渲染
 FCA
