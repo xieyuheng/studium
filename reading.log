@@ -1,6 +1,7 @@
-2026-11-02 read persons/niklaus-wirth/1971-program-development-by-stepwise-refinement.pdf
-2026-06-25 read langs/llvm/2004-llvm-a-compilation-framework-for-lifelong-program-analysis-transformation.pdf
-2026-06-21 read topics/computer-science/static-single-assignment/1998-ssa-is-functional-programming-andrew-w-appel.pdf
+# date event path
+2026-11-02 read persons/niklaus-wirth/1971-program-development-by-stepwise-refinement.md
+2026-06-25 skim langs/llvm/2004-llvm-a-compilation-framework-for-lifelong-program-analysis-transformation.pdf
+2026-06-21 skim topics/computer-science/static-single-assignment/1998-ssa-is-functional-programming-andrew-w-appel.pdf
 2026-05-09 read topics/type-theory/gradual-typing/2006-gradual-typing-for-functional-languages.md
 2026-03-25 read persons/george-stephen-boolos/2007-computability-and-logic--fifth-edition.md
 2026-03-17 read topics/mathematics/coinduction/2012-howe-s-method-for-higher-order-languages--andrew-pitts.md
