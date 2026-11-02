@@ -40,11 +40,6 @@ V. G. Boltyanskii, Intuitive Combinatorial Topology
 
 - topics/mathematics/combinatorial-group-theory/2000-intuitive-combinatorial-topology-abe-shenitzer.djvu
 
-# niklaus wirth
-
-- 1971-program-development-by-stepwise-refinement.md
-  markdown 文学编程。
-
 # float
 
 学习浮点数 asm 的书。
