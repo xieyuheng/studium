@@ -2,7 +2,6 @@
 title: The Fixation of Belief
 author: Charles Sanders Peirce
 year: 1877
-audio: "https://www.youtube.com/watch?v=gJAGMWZ3YQU"
 ---
 
 # I

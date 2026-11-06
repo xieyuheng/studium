@@ -2,7 +2,6 @@
 title: How to Make Our Ideas Clear?
 author: Charles Sanders Peirce
 year: 1878
-audio: "https://www.youtube.com/watch?v=QwODCQHhPI8"
 ---
 
 # I
