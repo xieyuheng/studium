@@ -10,7 +10,7 @@ year: 1971
 以及语言学中的篇章学结合起来。
 为 meta-lisp 设计一种可以运行 markdown 文件的机制。
 
-本文的中文也许可以翻译成《通过逐步细化来编程》。
+"stepwise refinement" 建议翻译成「逐步精细」。
 
 # Abstract
 
