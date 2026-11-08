@@ -139,7 +139,7 @@ x1 x2 ... xk
 就是一个以 state 为节点的，
 深度优先的「解法树」（solution tree）搜索。
 
-这是 `trial-and-error` 的一个递归变体：
+这是 `trial-and-error` 的一个函数式变体：
 
 ```meta-lisp skip
 (define (search-solutions progress solutions)
