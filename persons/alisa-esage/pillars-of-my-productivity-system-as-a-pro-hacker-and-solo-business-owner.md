@@ -1,5 +1,5 @@
 ---
-source: "https://www.youtube.com/watch?v=igoa0ljNehY&list=PLRlg6hmEQ3sCY6cj2mT_AxnJoLdypQcw1&index=8"
+source: "https://www.youtube.com/watch?v=igoa0ljNehY"
 ---
 
 关于主体认知（identity）的思考。
