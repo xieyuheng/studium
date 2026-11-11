@@ -21,3 +21,5 @@ source: "https://www.youtube.com/watch?v=ediLlLwTxAU"
 
 ~/persons/e-t-jaynes
 - probability theory
+
+http://neuralnetworksanddeeplearning.com/
