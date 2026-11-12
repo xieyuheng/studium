@@ -2,6 +2,52 @@
 title: The Little Learner
 ---
 
+# Foreword by Guy L. Steele Jr.
+
+> This book is _exactly_ right.
+
+> Dan Friedman, with his able and expert co-authors, has
+> been writing books in his unique “Little” style for over
+> four decades. Every one is a gem, explaining deep and
+> important ideas in computer science in bite-sized chunks.
+> Dan and his co-authors have raised the “programmed
+> learning” question-and-answer format to an art form, to a
+> conversational style that seems almost breezy.  This very
+> volume introduces two innovations, _nuggets_ and _revision
+> charts_, that further streamline the presentation of
+> chunks of program code and their behavior.
+
+> The authors themselves remark: “Little” books are all
+> about packaging ideas neatly into little boxes.
+
+可否让 AI agent 为某个领域的知识生成 little books？
+
+# Preface
+
+> Deep learning, an emerging area of artificial
+> intelligence, has revolutionized the way problems are
+> solved, be it winning at Go, recognizing cats in pictures,
+> or asking a smart speaker to order pizza. The most
+> beautiful thing about deep learning is how simple pieces
+> come together to solve large, complex problems. How can we
+> understand what makes these deep learning tools work? Our
+> approach is to build them, a little bit at a time, and
+> watch them work.
+
+> This book builds up a collection of concepts, with nearly
+> all of them being functions.
+
+因此「文学式编程」也应该以用函数表达的概念为元素，
+而不是以任意的代码片段为元素。
+
+> We also categorize key properties as either _rules_ or
+> _laws_. Our rules are about the structure of entities,
+> like their sizes. Our laws, on the other hand, are about
+> the behavior of entities, like their equalities and
+> invariants.
+
+structure knowledge and behavior knowledge of entities。
+
 # 0: Are You Schemish?
 
 复习一下 Scheme。
