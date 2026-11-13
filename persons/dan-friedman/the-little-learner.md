@@ -17,6 +17,8 @@ title: The Little Learner
 > charts_, that further streamline the presentation of
 > chunks of program code and their behavior.
 
+nuggets 就是代码块。
+
 > The authors themselves remark: “Little” books are all
 > about packaging ideas neatly into little boxes.
 
@@ -55,6 +57,36 @@ structure knowledge and behavior knowledge of entities。
 # 1: The Lines Sleep Tonight
 
 介绍 line 这个简单的函数。
+
+```
+y = w x + b
+```
+
+```scheme
+(define line
+  (lambda (x)
+    (lambda (w b)
+      (+ (* w x) b))))
+```
+
+> Here, though, we deal with a different kind of problem,
+> where `x` is known, but `w` and `b` must be figured out
+> from a bunch of given values of `x` and `y`.
+
+从这个反向的参数顺序，
+已经可以看到机器学习的特点了。
+
+形式参数的分类：
+
+- w，b -- parameters
+- x -- argument
+
+翻译建议：
+
+- w, b 是「模型参数」，或「可学习参数」
+- x 是「自变量」，或「输入」
+
+TODO
 
 # 2: The More We Learn, the Tenser We Become
 
