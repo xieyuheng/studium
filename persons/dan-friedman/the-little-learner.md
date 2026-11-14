@@ -86,7 +86,61 @@ y = w x + b
 - w, b 是「模型参数」，或「可学习参数」
 - x 是「自变量」，或「输入」
 
-TODO
+> Functions that accept parameters after the arguments are
+> known as
+>
+>     parameterized functions
+>
+> Parameterized functions are used where we must figure out
+> the right values for the parameters (here, `w` and `b`)
+> from given values of `x` and the corresponding values of
+> `y`.
+
+已知「带参数的函数」（parameterized functions）
+和输入输出的「数据集」（dataset），
+就可以推测出合理的模型参数（parameters）。
+
+带参数的函数：
+
+```
+y = w x + b
+```
+
+数据集：
+
+```scheme
+(define line-xs [2.0 1.0 4.0 3.0])
+(define line-ys [1.8 1.2 4.2 3.3])
+```
+
+找到最合适的模型参数为 `w = 1` 与 `b = 0`：
+
+- 具体的寻找方式，我们先不讨论。
+
+```
+y = x
+```
+
+这就是「从数据集学习模型参数」的一个具体例子。
+
+习得模型参数之后，
+对于新输入我们就可以预测其输出。
+
+比如对于 `x = 3.79` 预测 `y = 3.79`。
+
+> We refer to this as the _predicted_ `y` for a given `x`.
+
+一句话定义 learning：
+
+> Finding the parameters of a function from a data set
+> is known as _learning_.
+
+结构相关的知识称作 rule，
+这里给出第一条 rule：
+
+> **The Rule of Parameters**
+>    (Initial Version)
+> Every parameter is a number.
 
 # 2: The More We Learn, the Tenser We Become
 
