@@ -142,6 +142,23 @@ y = x
 >    (Initial Version)
 > Every parameter is a number.
 
+> The parameters `w` and `b` here are collectively known as
+> the parameter set, which we refer to as `θ`.
+>
+> So, our `θ` has two parameters. They are referred to as
+> members of `θ`.
+
+```scheme
+(define line
+  (lambda (x)
+    (lambda (θ b)
+      (+ (* (ref θ 0) x) (ref θ 1)))))
+```
+
+> Can we define a function that determines `θ` for any data
+> set?  Yes, we can, and such a function is an example of
+> what is known as _machine learning_.
+
 # 2: The More We Learn, the Tenser We Become
 
 介绍 Tenser 的概念。
