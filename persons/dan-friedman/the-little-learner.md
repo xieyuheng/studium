@@ -304,11 +304,187 @@ scalar 的 shape 是空列表 `(list)`。
 
 # 3: Running Down a Slippery Slope
 
-介绍梯度。
+介绍最小二乘法与梯度。
+
+> Let us now return to defining a function to automatically
+> find the `θ` that best fits (from frame 27:29) the given
+> data set in 24:17. We refer to this `θ` as _well fitted_.
+
+> Here we introduce
+>
+>     successive approximations
+>
+> a way to find a well-fitted `θ`.
+
+> We determine `θ[0]` and `θ[1]` by arbitrarily starting them
+> at `0.0`. We then repeatedly revise `θ` to bring it as
+> close as we wish to what it must finally be.
+
+我们需要一个任意的起始 `θ`，
+然后找到一个度量模型与数据拟合（fit）程度的方式，
+然后求解一个极值问题。
+
+> In order to do that, we need to know how far away we are
+> from the well-fitted `θ`.
+>
+> We need a _single_ scalar that tells us how close or how
+> far away we are. This scalar is known as the loss. The
+> well-fitted `θ` would be the one where this loss is as
+> close to `0.0` as possible.
+>
+> When the loss is `0.0`, it is _ideal_.
+
+ > We determine this scalar, or loss, every time we revise
+> `θ`. Since the loss shows us how far away we are from the
+> well-fitted `θ`, we use it as a guide for revising `θ`.
+
+```scheme
+(define l2-loss
+  (lambda (xs ys)
+    (lambda (θ)
+      (let ((predicted-ys ((line xs) θ)))
+        (sum
+         (square
+          (sub ys predicted-ys)))))))
+```
+
+> In mathematics, the square root of the sum of the squares
+> of a tensor-1 is known as L2-norm. The L2-norm is also
+> known as Euclidean distance.
+
+我们这里没有 square root，
+所以用的是 Euclidean distance 的平方。
+
+> When used as a loss function, however, the square root is
+> typically left out. Another variant of this loss function
+> divides the sum of the squares by the number of elements
+> in the tensor to produce a mean squared error (or MSE)
+> loss function.
+
+把对 `line` 定义的 `l2-loss` 一般化：
+
+```scheme
+(define l2-loss
+  (lambda (target)
+    (lambda (xs ys)
+      (lambda (θ)
+        (let ((predicted-ys ((target xs) θ)))
+          (sum
+           (square
+            (sub ys predicted-ys))))))))
+```
+
+在带有 auto-currying 的语言中，可以直接写：
+
+```meta-lisp
+(define (l2-loss target xs ys θ)
+  (let ((predicted-ys ((target xs) θ)))
+    (sum (square (sub ys predicted-ys)))))
+```
+
+`(l2-loss target)` 称作「待参函数」（expectant function）。
+
+> ... because it is _expecting_ a data set as arguments.
+
+`(l2-loss target xs ys)` 称作「目标函数」（objective function）。
+
+> When provided with a `θ`, the objective function produces
+> a scalar representing the loss, which is a measure of how
+> far away we are from the well-fitted `θ`.
+
+也就是优化问题中的目标函数。
+我们要找到目标函数的最优参数，
+使得其函数值（这里的 loss）最小。
+
+下面就要用「逐步逼近法」（successive approximations）
+来寻找最优参数，这就需要求出「逐步逼近」的方向，
+这就需要「梯度」。
+
+> We have to be wary that our revision of `θ[0]` always
+> moves us closer to, but does not overshoot, the ideal
+> loss.
+
+> We take a small scalar (like `0.01`), and multiply the
+> rate of change by it, and revise `θ[0]` by that amount.
+
+> This small scalar is known as the
+>
+>     learning rate
+>
+> Since we use this scalar often, we have a special symbol
+> for it: `α`
+
+> The learning rate (usually a very small number between
+> `0.0` and `0.01`) is also known as the step size. We'll
+> see more of how to find an appropriate learning rate in
+> later chapters.
+>
+> The step size is sometimes written as `λ`, but because we
+> already have a meaning for `λ`, we prefer to use a
+> different Greek letter.
+
+> **The Law of Revision**
+>     (Initial Version)
+> new `θ[0]` = `θ[0]` − (`α` × rate of change of `loss`
+> with respect to `θ[0]`)
+
+其中 rate of change of `loss` with respect to `θ[0]`，
+就是 `loss` 函数针对第一个参数的偏导数。
+
+这一章用一个小的扰动 0.0099，
+来计算偏导数的近似值，
+这种方法是「有限差分」（finite difference）。
+
+# 预习：反向模式自动微分
+
+「反向模式自动微分」
+（Reverse-Mode Automatic Differentiation）。
+
+```
+z = (x + y) * y
+```
+
+一条链上嵌套的表达式，可以用嵌套函数的链式法则求偏导数。
+
+为什么一个变量的多次出现，可以通过累加来计算偏导数？
+
+因为微分研究的是「局部线性化」，
+而线性系统满足叠加原理。
+
+线性性的直接后果就是叠加：
+几个小扰动一起作用，总效应等于各自单独作用之和，
+交叉项是二阶小量，可以忽略。
+
+所以当 `y` 在 `f(x, y)` 中出现两次时，
+你可以假装「先只让第一个 `y` 变，再只让第二个 `y` 变」：
+- 第一个位置贡献一份 `Δz1`
+- 第二个位置贡献一份 `Δz2`
+总变化：`Δz ≈ Δz1 + Δz2`
+除以 `Δy` 取极限，就是梯度相加。
+
+另外一种理解方式是：
+把每次出现看作是不同的变量，
+然后再嵌套一层恒等函数，
+用恒等函数的链式法则。
+
+```
+∂z/∂y = ∂z/∂y1 * ∂y1/∂y
+      + ∂z/∂y2 * ∂y2/∂y
+```
+
+机器学习的框架，就是要把这个反向传播的计算图，
+编译到 GPU 的 primitive 操作（GPU kernel）。
+其实机器学习所要解决的，就是一个编译与编译器优化问题。
+
+如此看来，我的工作应该是：
+
+- 设计一个基于 lisp 语法的模型描述语言。
+- 得到反向传播计算图，并编译到 GPU kernel。
+- 从而完成机器学习任务。
 
 # 4: Slip-slidin’ Away
 
-递归下降法。
+TODO 介绍递归下降法。
 
 # Interlude II: Too Many Toys Make Us Hyperactive
 
