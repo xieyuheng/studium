@@ -163,6 +163,95 @@ y = x
 
 介绍 Tenser 的概念。
 
+所有的实数称为标量（scalar）
+
+- 这里引入 `scalar?` 谓词了，
+  静态类型语言应该如何处理未来的符号微分问题？
+
+以标量为元素的是 tensor-1：
+
+> [5.0 7.18 π]
+
+- 类似向量和一维数组，但是不允许为空。
+
+以 tensor-1 为元素的是 tensor-2：
+
+> [[7 6 2 5] [3 8 6 9] [9 4 8 5]]
+
+一般的，以 tensor-m 为元素的是 tensor-m+1，
+但是有一个条件：所有 tensor-m 的长度必须相等。
+
+tensor 的这个属性叫做 rank。
+
+> The _rank_ of a tensor tells us how deeply nested its
+> elements are.
+
+> **The Rule of Rank**
+> A tensor's rank is the number of left square brackets
+> before its leftmost scalar.
+
+如果是在 meta-lisp 中，
+可能会有如下函数命名：
+
+```meta-lisp
+tensor-length
+tensor-get
+tensor-shape
+tensor-rank
+```
+
+作为 tensor-m+1 元素的所有 tensor-m 的长度必须相等。
+这个限制可以用来定义 tensor 的 shape。
+
+比如 `[[5.2 6.3 8.0] [6.9 7.1 0.5]]`
+的 shape 是 `(list 2 3)`，
+因为这个 tensor-2 有 2 个 tensor-1 元素，
+每个 tensor-1 有 3 个 tensor-0 元素。
+
+又比如 `[[[5] [6] [8]] [[7] [9] [5]]]`
+的 shape 是 `(list 2 3 1)`，
+因为这个 tensor-3 有 2 个 tensor-2 元素，
+每个 tensor-2 有 3 个 tensor-1 元素，
+每个 tensor-1 有 1 个 tensor-0 元素。
+
+scalar 的 shape 是空列表 `(list)`。
+
+一个用来在术语上区分 list 和 tensor 的 rule：
+
+> **The Rule of Members and Elements**
+> Non-empty lists have members
+> and non-scalar tensors have elements.
+
+> **The Rule of Uniform Shape**
+> All elements of a tensor must have the same shape.
+
+> **The Law of Rank and Shape**
+> The rank of a tensor is equal to the length of its shape.
+
+```scheme
+(define rank
+  (λ (t)
+    (ranked t 0)))
+
+(define ranked
+  (λ (t a)
+    (cond
+     ((scalar? t) a)
+     (else (ranked (tref t 0) (add1 a))))))
+```
+
+> **The Law of Simple Accumulator Passing**
+> In a simple accumulator passing function definition
+> every recursive function invocation is unwrapped,
+> and the definition has
+> - at most one argument that _does not change_;
+> - an argument that _changes towards a true_ base test;
+> - andanother that _accumulates_ a result.
+
+> Every Scheme system is required to support _tail call
+> optimization_ which makes each unwrapped recursive
+> invocation behave the same as a loop.
+
 # Interlude I: The More We Extend, the Less Tensor We Get
 
 将作用于标量的函数扩展成可以作用于张量的函数。
