@@ -151,7 +151,7 @@ y = x
 ```scheme
 (define line
   (lambda (x)
-    (lambda (θ b)
+    (lambda (θ)
       (+ (* (ref θ 0) x) (ref θ 1)))))
 ```
 
@@ -254,7 +254,53 @@ scalar 的 shape 是空列表 `(list)`。
 
 # Interlude I: The More We Extend, the Less Tensor We Get
 
-将作用于标量的函数扩展成可以作用于张量的函数。
+将标量的函数，
+逐点扩展（pointwise extension）成张量函数。
+
+进一步，对于二元函数，
+只要一个 tensor 的 shape
+是另一个 tensor 的 shape 的后缀，
+扩张就都成立。
+
+比如：
+
+- `(list 3)`
+- `(list 2 3)`
+
+```scheme
+(+ [6 9 1] [[4 3 8] [7 4 7]])
+;; =>
+[(+ [6 9 1] [4 3 8])
+ (+ [6 9 1] [7 4 7])]
+```
+
+接受 tenser-1 参数的 `sum-1`，
+也可以被扩展为接受 tenser-1+n 参数的 `sum`。
+`sum` 会消除 shape 的最后一个元素，
+比如 `(list 1 2 3)` 会变为 `(list 1 2)`。
+
+> **The Law of Sum**
+> For a tensor `t` with rank `r > 0`,
+> the rank of `(sum t)` is `r − 1`.
+
+> If we use extended functions to form new functions, then
+> the new functions also automatically work in an extended
+> fashion.
+
+这里的例子是 `line`。
+
+- 注意，argument 是 tensor；
+  parameters 是 list。
+
+```scheme
+((line [2 7 5 11]) (list 4 6))
+```
+
+> This interlude is about how it is possible to extend
+> functions that operate on fixed ranks of tensors into
+> functions that also accept tensors of different ranks. We
+> use the concept of _descending_ into the higher-ranked
+> tensors to accomplish this.
 
 # 3: Running Down a Slippery Slope
 

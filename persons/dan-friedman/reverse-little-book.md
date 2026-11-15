@@ -38,7 +38,7 @@ date: 2026-11-15
     - answer
   - rule
   - law
-- interlude
+- interlude -- where we temporarily shift our focus.
 - appendix
 
 除了这些还有别的文本内的元素，
