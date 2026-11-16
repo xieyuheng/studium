@@ -310,6 +310,13 @@ scalar 的 shape 是空列表 `(list)`。
 > find the `θ` that best fits (from frame 27:29) the given
 > data set in 24:17. We refer to this `θ` as _well fitted_.
 
+learning 问题是根据数据集寻找模型参数，
+机器学习的方法，首先要把这个问题转化为一个极值问题。
+
+> 数据集 + 模型 -> 目标函数
+
+当模型参数为 well fitted 时，目标函数取极值。
+
 > Here we introduce
 >
 >     successive approximations
@@ -322,19 +329,19 @@ scalar 的 shape 是空列表 `(list)`。
 
 我们需要一个任意的起始 `θ`，
 然后找到一个度量模型与数据拟合（fit）程度的方式，
-然后求解一个极值问题。
+度量的结果称为 loss，然后求解一个 loss 的极值问题。
 
 > In order to do that, we need to know how far away we are
 > from the well-fitted `θ`.
 >
 > We need a _single_ scalar that tells us how close or how
-> far away we are. This scalar is known as the loss. The
+> far away we are. This scalar is known as the _loss_. The
 > well-fitted `θ` would be the one where this loss is as
 > close to `0.0` as possible.
 >
 > When the loss is `0.0`, it is _ideal_.
 
- > We determine this scalar, or loss, every time we revise
+> We determine this scalar, or loss, every time we revise
 > `θ`. Since the loss shows us how far away we are from the
 > well-fitted `θ`, we use it as a guide for revising `θ`.
 
@@ -484,7 +491,65 @@ z = (x + y) * y
 
 # 4: Slip-slidin’ Away
 
-TODO 介绍递归下降法。
+这一章介绍递归下降法。
+
+上一章我们已经把 learning 问题转化为了极值问题，
+并且大致给出了解决极值问题的思路。
+
+这一章继续完善极值问题的解法。
+
+横轴是 `θ[0]` 纵轴是 loss，
+画图就可以看出这个求极值问题的全貌。
+
+在这个图中某一点的切线的斜率，
+就是梯度在这一点的第一个分量。
+
+> The rate of change that we have determined is the
+>
+>     slope of the tangent
+>
+> This slope has a different name so we don't confuse it
+> with `θ[0]`. It is known as the
+>
+>     gradient
+>
+> A gradient is a general way of understanding the rate of
+> change of a parameterized function with respect to _all_
+> its parameters.
+
+我们将会用自动微分算法实现一个 `gradient` 函数。
+
+```meta-lisp
+(define-type parameters-t (list-t tensor-t))
+
+(claim gradient
+  (-> (-> parameters-t scalar-t) parameters-t
+      parameters-t))
+```
+
+一个没法在类型中表达的不变量是：
+在某个 parameters 上的 gradient，
+其形状和 parameters 一致。
+
+注意「自动微分」与「符号微分」的区别，
+「符号微分」要求给出某个函数的导数的一般表达式，
+而「自动微分」只要求能够计算函数在每一点的具体导数。
+
+先实现一个一般的，用来迭代 `f` 多次的辅助函数：
+
+```scheme
+(define revise
+  (lambda (f revs θ)
+    (cond
+     ((zero? revs) θ)
+     (else
+      (revise f (sub1 revs) (f θ))))))
+```
+
+> Now let's get back to defining a (revision) function that
+> guides us from one `θ` to the next.
+
+TODO
 
 # Interlude II: Too Many Toys Make Us Hyperactive
 
