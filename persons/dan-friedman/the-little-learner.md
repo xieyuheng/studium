@@ -549,7 +549,38 @@ z = (x + y) * y
 > Now let's get back to defining a (revision) function that
 > guides us from one `θ` to the next.
 
-TODO
+在 revision 中：
+
+> We multiply the gradient for a given parameter by the
+> learning rate α and subtract it from that parameter.
+
+如何理解这里的「减法」而不是「加法」？
+因为导数度量的是增加的速度，
+因此梯度指向损失函数上升最快的方向，
+
+- 如果梯度为正：`∂L/∂θ[i] > 0`，
+  说明增大 `θ[i]` 会让损失变大，所以应该减小 `θ[i]`。
+  减去一个正数，正好让它变小。
+
+- 如果梯度为负：`∂L/∂θ[i] < 0`，
+  说明增大 `θ[i]` 会让损失变小，所以应该增大 `θ[i]`。
+  减去一个负数，等于加上一个正数，正好让它变大。
+
+所以统一写成「减去梯度」，
+就能自动沿着损失下降最快的方向走，
+这叫做「梯度下降」。
+
+> **The Law of Revision**
+>     (Final Version)
+> new `θ[i]` = `θ[i]`
+>   − (`α` × rate of change of `loss` w.r.t. `θ[0]`)
+
+> This algorithm for finding parameters is known as
+>
+>     optimization by gradient descent
+>
+> Who knew sliding down a slippery slope would be this much
+> fun!
 
 # Interlude II: Too Many Toys Make Us Hyperactive
 
