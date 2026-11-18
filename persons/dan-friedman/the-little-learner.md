@@ -584,15 +584,60 @@ z = (x + y) * y
 
 # Interlude II: Too Many Toys Make Us Hyperactive
 
-介绍 dynamic scope，可以用来处理递归下降法中的参数。
+介绍 dynamic scope，
+可以用来处理递归下降法中的「超参数」（hyperparameters）。
+
+「超参数」的特点是必须就具体情况通过实验来确定。
 
 我们在练习实现的时候可以不用 dynamic scope，
 因为这是一个程序语言级别的功能，
 而一般的程序语言没有 dynamic scope 这个功能。
 
-在一般的程序语言中，我们可以使用的备选方案是，
-直接多带一个参数 `options`，
-把需要的所有参数都传到函数里。
+在一般的程序语言中，我们可以使用的备选方案是：
+
+- 方案 A：直接多带一个参数 `options`，
+  把需要的所有参数都传到函数里。
+  缺点是所有函数都会多一个参数。
+
+- 方案 B：用 stack 来模拟 dynamic scope。
+
+> **The Rule of Hyperparameters**
+> Every hyperparameter either is a scalar or has no value.
+
+```scheme
+(declare-hyper smaller)
+(declare-hyper larger)
+
+(with-hypers
+    ((smaller 1)
+     (larger 2000))
+  (+ smaller larger))
+```
+
+> A `let`-expression creates a new local name for a value,
+> but a `with-hypers` provides a new value for a
+> pre-existing name that has been declared as a
+> hyperparameter.
+
+为了避免大量传递参数，可能还是需要「方案 B」。
+只不过我们可以完全用 stack 实现，
+让取 hyperparameter 的表达式变得更 explicit。
+
+比如：
+
+- `with-hyper` 和 `hyper-get` 都实为函数。
+
+```scheme
+(with-hyper smaller 1
+  (lambda ()
+    (with-hyper larger 2000
+      (lambda ()
+        (+ (hyper-get smaller)
+           (hyper-get larger))))))
+```
+
+看来这样是不合理的，因为语法太啰嗦了，
+还是需要专门实现 dynamic scope 的语法。
 
 # 5: Target Practice
 
