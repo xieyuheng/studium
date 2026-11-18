@@ -163,10 +163,7 @@ y = x
 
 介绍 Tenser 的概念。
 
-所有的实数称为标量（scalar）
-
-- 这里引入 `scalar?` 谓词了，
-  静态类型语言应该如何处理未来的符号微分问题？
+所有的实数称为标量（scalar）。
 
 以标量为元素的是 tensor-1：
 
@@ -301,6 +298,13 @@ scalar 的 shape 是空列表 `(list)`。
 > functions that also accept tensors of different ranks. We
 > use the concept of _descending_ into the higher-ranked
 > tensors to accomplish this.
+
+这个扩张将会在之后用来实现自动微分，
+但是实际的高效的自动微分计算，
+是不能使用这种动态语言的方式的，
+甚至可能也不能使用这里对于不同 shape 的 tensor 的重载。
+
+问题：静态类型语言应该如何处理未来的自动微分问题？
 
 # 3: Running Down a Slippery Slope
 
@@ -639,25 +643,156 @@ z = (x + y) * y
 看来这样是不合理的，因为语法太啰嗦了，
 还是需要专门实现 dynamic scope 的语法。
 
+scheme 标准中，
+直接把 dynamic scoped variable 当作零元函数：
+
+```scheme
+(define smaller (make-parameter 0))
+(define larger (make-parameter 0))
+
+(parameters
+    ((smaller 1)
+     (larger 2000))
+  (+ (smaller) (larger)))
+```
+
+早期 scheme 有 `fluid-let`：
+
+```scheme
+(fluid-let
+    ((smaller 1)
+     (larger 2000))
+  (+ smaller larger))
+```
+
+其实现方式是先用 `set!` 临时改变局部变量，
+在结束之后再 `set!` 回之前的值。
+
+这样实现的好处是：
+
+- 不用声明动态作用域变量。
+- 不用额外设置 stack。
+
+缺点是不能正确处理 `call/cc`。
+
+scheme 中有一个专门和 `call/cc`
+配合使用的函数 `dynamic-wind`，
+利用这个函数，可以实现支持 `call/cc` 的
+`make-parameter` 和 `parameters`。
+
 # 5: Target Practice
 
 之前用 line 测试了递归下降法，
 line 被称为 target，
 这章找更多的 target 函数来练习一下。
 
-练习了一个非线性函数 -- 二次函数 quad，
-还有一个多元函数 -- 平面 plane。
+target 包括：
+
+- 一个非线性函数 -- 二次函数 quad，
+- 一个多元函数 -- 平面 plane。
+
+这里再次需要用「溯因推理」的方式，
+猜测出这些 target 的模型。
+
+需要介绍线性与非线性函数，
+需要介绍二次函数，等等新概念。
+方式是给出简要的精准的定义，
+然后再次拆解定义中没有定义的概念。
+这最终会像一个树状图一样，
+把所有概念的定义产开成常识。
+
+```scheme
+(nonlinear-function
+ "a nonlinear function is not linear in its arguments."
+ (linear-function
+  "a linear function one that uses only addition
+   and scaling to find its result."
+  (scaling
+   "scaling multiplies its argument
+    by a fixed value or by a parameter.")))
+
+(quadratic-data-set
+  "it can be predicted by a quadratic function."
+  (quadratic-function
+   "Here is a general definition of a quadratic function: ..."))
+```
+
+```scheme
+(define quad
+  (lambda (t)
+    (lambda (θ)
+      (+ (* (ref θ 0) (square t))
+         (+ (* (ref θ 1) t)
+            (ref θ 2))))))
+```
+
+这个概念树的展开过程中，
+可以辅助例子和解释。
+
+另外我们可以发现，
+某些概念是用大量的例子来引入的，
+比如 "The Little Schemer" 的开头，
+对原子性概念的定义。
+
+因此我们可以总结：
+
+- 原子型概念，用大量例子与操作来建立直觉。
+- 复合型概念，通过精准简洁的定义来展开概念树。
+
+这是自上而下的讲授方法，
+也有自下而上的，比如对 learning 的精确定义之前，
+先预习了 function 和 parameters 以及 data set 的概念。
+
+与其说是「概念树」，
+不如说是由概念的定义所引出的依赖关系所形成的「概念格」，
+底层是假设读者已知「基础概念」，
+上层是需要学习的「新概念」。
+
+每个章节，其实都是以线性讲述的方式，
+在这个「概念格」中探索了一部分。
+
+介绍 plane 的模型：
+
+```scheme
+(define plane
+  (lambda (t)
+    (lambda (θ)
+      (+ (dot-product-1-1 (ref θ 0) t)
+         (ref θ 1)))))
+
+(define dot-product-1-1
+  (lambda (w t)
+    (sum-1 (* w t))))
+```
+
+此时 `θ[0]` 和 `t` 都是 tensor-1，
+从而扩展了 data sets 和 parameters 的例子。
+
+> **The Rule of Data Sets**
+> In a data set `(xs, ys)` both `xs` and `ys` must have the
+> same number of elements.  The elements of `xs`, however,
+> can have a different shape from the elements of `ys`.
 
 > **The Rule of Parameters**
 >     (Final Version)
 > Every parameter is a tensor.
 
-注意 `Parameters` 不是 `Tensor` 而是 `Array<Tensor>`，
-因为每个 parameter 的 shape 可能不一样。
-
 > **The Rule of θ**
-> θ is a list of parameters
+> `θ` is a list of parameters
 > that can have different shapes.
+
+parameters 的具体形状，
+要看 parameters 在模型中的具体用法才能确定。
+比如在 plane 这个例子中，
+可以根据「类型推导」找出 parameters 的形状，
+当然这不是真的类型推导，
+因为 shape 信息不再类型中。
+
+在没有 dependent type 的情况下，
+也许可以直接把带有 shape 的 tensor 类型内置到语言中。
+
+进一步，也许通过给 meta-lisp 加一个 macro system，
+就可以让 meta-lisp 成为 machine learning 的 meta language。
 
 # Interlude III: The Shape of Things to Come
 
