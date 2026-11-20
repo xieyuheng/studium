@@ -16,3 +16,5 @@ th, td { border: 1px solid #dbe2ea; padding: 3pt 4pt; vertical-align: top; }
 th { background: #f1f5f9; text-align: left; color: #0f172a; }
 td:first-child { white-space: nowrap; color: #334155; }
 @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } h2, h3 { break-after: avoid; } tr { break-inside: avoid; } }
+
+header#title-block-header { display: none; }
