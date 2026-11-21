@@ -315,7 +315,8 @@ scalar 的 shape 是空列表 `(list)`。
 > data set in 24:17. We refer to this `θ` as _well fitted_.
 
 learning 问题是根据数据集寻找模型参数，
-机器学习的方法，首先要把这个问题转化为一个极值问题。
+机器学习的方法，首先要把这个问题转化为一个「求极值点」问题。
+所谓「求极值点」，就是求使得目标函数取极值的模型参数。
 
 > 数据集 + 模型 -> 目标函数
 
@@ -333,7 +334,7 @@ learning 问题是根据数据集寻找模型参数，
 
 我们需要一个任意的起始 `θ`，
 然后找到一个度量模型与数据拟合（fit）程度的方式，
-度量的结果称为 loss，然后求解一个 loss 的极值问题。
+度量的结果称为 loss，然后求解一个 loss 的极值点问题。
 
 > In order to do that, we need to know how far away we are
 > from the well-fitted `θ`.
@@ -497,13 +498,13 @@ z = (x + y) * y
 
 这一章介绍递归下降法。
 
-上一章我们已经把 learning 问题转化为了极值问题，
-并且大致给出了解决极值问题的思路。
+上一章我们已经把 learning 问题转化为了「求极值点」问题，
+并且大致给出了解决「求极值点」问题的思路。
 
-这一章继续完善极值问题的解法。
+这一章继续完善「求极值点」问题的解法。
 
 横轴是 `θ[0]` 纵轴是 loss，
-画图就可以看出这个求极值问题的全貌。
+画图就可以看出这个「求极值点」问题的全貌。
 
 在这个图中某一点的切线的斜率，
 就是梯度在这一点的第一个分量。
@@ -773,6 +774,29 @@ target 包括：
 > same number of elements.  The elements of `xs`, however,
 > can have a different shape from the elements of `ys`.
 
+数据集是 tensor，比如：
+
+- 尽管最外层的 tensor 只是为了表达「数据集」中的「集」。
+  由于集合中的数据形状相等，所以满足 tensor 的要求。
+
+```scheme
+(define plane-xs
+  [[1.0 2.05]
+   [1.0 3.0]
+   [2.0 2.0]
+   [2.0 3.91]
+   [3.0 6.13]
+   [4.0 8.09]])
+
+(define plane-ys
+  [13.99
+   15.99
+   18.0
+   22.4
+   30.2
+   37.94])
+```
+
 > **The Rule of Parameters**
 >     (Final Version)
 > Every parameter is a tensor.
@@ -796,39 +820,199 @@ parameters 的具体形状，
 
 # Interlude III: The Shape of Things to Come
 
-介绍新的 Tensor 的缩写。
+tensor-2 是矩阵。
 
-把 rank 为 2 的 tensor 写成矩阵，
-然后在旁边标注上 shape。
+比如下面的矩阵呢 shape 是 `(2 3)`：
 
-比如 shape 为 `(3 1)` 的是 column matrix，
-而 shape 为 `(1 3)` 的是 row matrix。
+```scheme
+[[2 4 5]
+ [6 7 8]]
+```
+
+比如 shape 为 `(3 1)` 的是 column matrix：
+
+```scheme
+[[5]
+ [7]
+ [8]]
+```
+
+而 shape 为 `(1 3)` 的是 row matrix：
+
+```scheme
+[[5 7 8]]
+```
+
+这一节介绍新的 Tensor 的缩写，
+并且要标注 shape 来区分 row vector -- 比如 shape 为 `(3)`，
+与 row matrix -- 比如 shape 为 `(1 3)`。
+
+# 笔记：函数类型总结
+
+解释写在代码块之后。
+
+```meta-lisp
+(define-type parameters-t (list-t tensor-t))
+
+(define-type target-fn-t
+  (-> tensor-t parameters-t tensor-t))
+```
+
+`target-fn-t`
+也可以称为「模型函数」，从输入预测输出。
+- 第一个参数是「输入数据」；
+- 第二个参数是「模型参数」或「模型权重」；
+- 返回值是「输出数据」。
+
+```meta-lisp
+(define-type loss-fn-t
+  (-> target-fn-t
+      tensor-t tensor-t
+      parameters-t
+      scalar-t))
+```
+
+`loss-fn-t`
+通过引入度量，把「寻找模型参数」问题，
+转化为一个「求极值点」问题。
+- 第一个参数是「模型函数」；
+- 第二和第三个参数是「输入数据」和「输入数据」，
+  这两个参数构成了「数据集」；
+- 第四个参数是「模型参数」；
+- 返回值是 loss，即对「预测数据」
+  与实际「输出数据」之间差距的度量。
+
+```meta-lisp
+(define-type expectant-fn-t
+  (-> tensor-t tensor-t
+      parameters-t
+      scalar-t))
+
+(define-type objective-fn-t
+  (-> parameters-t
+      scalar-t))
+```
+
+`expectant-fn-t`
+是 `loss-fn-t` 的 currying，
+代表一个在等待数据集。
+
+`objective-fn-t`
+是 `expectant-fn-t` 的 currying，
+代表「求极值点」问题的「目标函数」。
+
+```meta-lisp
+(claim gradient (-> objective-fn-t parameters-t parameters-t))
+```
+
+`gradient` 通过梯度下降来解决「求极值点」问题。
 
 # 6: An Apple a Day
 
-用 Sampling 来避免在每次调用 loss 函数的时候都使用整个数据集。
+本章介绍一个机器学习技巧：
+不要每次计算梯度的时候都用完整的数据集，
+而是从数据集中取一个小的随机样本。
 
-> Using a small random sample of a few points
-> from the data set produces a good enough
-> approximation of loss, which can be used to
-> revise θ. We refer to this sample as a batch
-> and its generation as sampling a batch from
-> the data set.
+取样的另外一个原因是，
+需要留一些真实数据不用于寻找参数，
+而是用于检验模型的预测的数据是否符合真实数据。
+
+> Using a small random sample of a few points from the data
+> set produces a good enough approximation of loss, which
+> can be used to revise `θ`. We refer to this sample as a
+> _batch_ and its generation as _sampling a batch from the
+> data set_.
+
+> So, to sample a batch, we generate a few random indices,
+> and then select the corresponding elements from `xs` and
+> `ys`. We refer to these random indices as
+>
+>     _a batch of indices_
+
+> **The Rule of Batches**
+> A batch of indices consists of random indices that are
+> natural numbers smaller than `(tlen t)`.
+
+```scheme
+(define samples
+  (lambda (n s)
+    (sampled n s (list))))
+
+(define sampled
+  (lambda (n i a)
+    (cond
+      ((zero? i) a)
+      (else
+       (sampled n (sub1 i)
+         (cons (random n) a))))))
+```
+
+> So, now that we know how to randomly sample indices, how
+> do we use these indices to get a batch from the data set?
+>
+> We need a new toy for this!
+
+这里要引入一个新的 primitive 函数 `(trefs t b)`，
+看来 primitive 函数都叫做 toy。
+
+```scheme
+(declare-hyper batch-size)
+
+(define sampling-obj
+  (lambda (expectant xs ys)
+    (let ((n (tlen xs)))
+      (lambda (θ)
+        ;; b -- batch-indices
+        (let ((b (samples n batch-size)))
+          ((expectant (trefs xs b) (trefs ys b)) θ))))))
+```
 
 注意这里函数复合式的设计，
-实现 `samplingObjective` 之后，
-并不用修改 `gradientDescent` 的实现，
-只需要在使用 `gradientDescent` 的时候用 `samplingObjective` 做复合。
-在 Sussman 关于如何灵活地编程的新书中，也有提到类似的技巧。
+实现 `sampling-obj` 之后，
+并不用修改 `gradient-descent` 的实现，
+只需要在调用时把 `(expectant xs ys)`
+改为 `(sampling-obj expectant xs ys)`。
+
+```scheme
+(with-hypers
+   ((revs 1000)
+    (α 0.01)
+    (batch-size 4))
+ (gradient-descent
+  (sampling-obj
+   (l2-loss line) line-xs line-ys)
+  (list 0.0 0.0)))
+```
+
+如果考虑 currying，这其实是一个函数修饰器：
+
+- 在 Sussman 关于如何灵活地编程的新书中，
+  也有提到类似的技巧。
+
+```meta-lisp
+(define-type expectant-fn-t
+  (-> tensor-t tensor-t
+      parameters-t
+      scalar-t))
+
+(claim sampling-obj
+  (-> expectant-fn-t expectant-fn-t))
+```
 
 > This kind of gradient descent where the
 > objective function uses sampling is known as
-> _stochastic gradient descent_
+>
+>     _stochastic gradient descent_
+>
+> _Stochastic_ is another way of saying we use random
+> numbers to determine our results. Using _samples_ as part
+> of our objective function is what makes it stochastic.
 
 > **The Law of Batch Sizes**
-> Each revision in stochastic gradient descent uses only a batch of
-> size batch-size from the data set and the ranks of the tensors in
-> the batch are the same as the ranks of the tensors in the data set.
+> Each revision in stochastic gradient descent uses only a
+> batch of size `batch-size` from the data set and the ranks
+> of the tensors in the batch are the same as the ranks of
+> the tensors in the data set.
 
 # 7: The Crazy “ates”
 
