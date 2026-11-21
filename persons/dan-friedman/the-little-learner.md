@@ -1013,7 +1013,7 @@ tensor-2 是矩阵。
 > batch of size `batch-size` from the data set and the ranks
 > of the tensors in the batch are the same as the ranks of
 > the tensors in the data set.
-
+    
 # 7: The Crazy “ates”
 
 抽出来一个 interface，为下一步做准备。
