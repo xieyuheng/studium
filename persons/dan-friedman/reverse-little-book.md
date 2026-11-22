@@ -80,3 +80,43 @@ date: 2026-11-15
 我们可以把 frame 序列当成一个符号过程来分析，
 并且给 interpretant 分类，
 也就是给「从已有内容生成新内容」的方式分类。
+
+# 文字游戏
+
+尽量找教学内容可以自然引出的文字游戏。
+
+比如，在参数命名上，`θ` 代表 parameters，
+`Θ` 代表 accompanied parameters。
+
+由于小写的 theta 到大写的 theta 像是「吹气球」，
+所以两个方向的转化函数分别叫做 "inflate" 和 "deflate"。
+
+所设计的接口函数是 "inflate" "deflate" "update"，
+都有后缀 "-ate"，而这个接口参数是需要「先引入，后解释」的，
+读者总是在「期待」这个解释，所以就引入了 "grate expectations"，
+另一个以 "-ate" 为后缀的词组（来自狄更斯的小说《远大前程》），
+来描述读者的期待。
+
+又比如介绍梯度下降的章节叫做 "Slip-slidin’ Away"，
+是 保罗·西蒙 一首歌的名字，
+而后续的介绍梯度下降的技巧的章节叫做
+"The Nearer Your Destination, the Slower You Become"
+是这首歌的一句歌词的变体。
+
+这些文字游戏对于教学内容而言是装饰性的，
+但是又像是教学旅途中的有趣风景，
+让读者能回忆起这次旅行。
+
+每一章的标题都与其内容有关，
+但是单单看标题，一般猜不出这一章的内容是什么。
+每一章的标题都是一个小谜题。
+
+这些文字游戏也让人想起 Dan 是
+"Gödel, Escher, Bach: an Eternal Golden Braid"
+的作者 Douglas Hofstadter 的朋友。
+
+而 GEB 的核心概念是「怪圈」（Strange Loop）：
+
+> 一个系统如何通过自身的规则，
+> 反过来谈论或指涉自身，
+> 从而创造出超越规则本身的意义。

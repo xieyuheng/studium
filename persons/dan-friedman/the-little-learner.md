@@ -89,7 +89,7 @@ y = w x + b
 > Functions that accept parameters after the arguments are
 > known as
 >
->     parameterized functions
+>   parameterized functions
 >
 > Parameterized functions are used where we must figure out
 > the right values for the parameters (here, `w` and `b`)
@@ -140,6 +140,7 @@ y = x
 
 > **The Rule of Parameters**
 >    (Initial Version)
+>
 > Every parameter is a number.
 
 > The parameters `w` and `b` here are collectively known as
@@ -184,6 +185,7 @@ tensor 的这个属性叫做 rank。
 > elements are.
 
 > **The Rule of Rank**
+>
 > A tensor's rank is the number of left square brackets
 > before its leftmost scalar.
 
@@ -216,13 +218,16 @@ scalar 的 shape 是空列表 `(list)`。
 一个用来在术语上区分 list 和 tensor 的 rule：
 
 > **The Rule of Members and Elements**
+>
 > Non-empty lists have members
 > and non-scalar tensors have elements.
 
 > **The Rule of Uniform Shape**
+>
 > All elements of a tensor must have the same shape.
 
 > **The Law of Rank and Shape**
+>
 > The rank of a tensor is equal to the length of its shape.
 
 ```scheme
@@ -238,6 +243,7 @@ scalar 的 shape 是空列表 `(list)`。
 ```
 
 > **The Law of Simple Accumulator Passing**
+>
 > In a simple accumulator passing function definition
 > every recursive function invocation is unwrapped,
 > and the definition has
@@ -277,6 +283,7 @@ scalar 的 shape 是空列表 `(list)`。
 比如 `(list 1 2 3)` 会变为 `(list 1 2)`。
 
 > **The Law of Sum**
+>
 > For a tensor `t` with rank `r > 0`,
 > the rank of `(sum t)` is `r − 1`.
 
@@ -324,7 +331,7 @@ learning 问题是根据数据集寻找模型参数，
 
 > Here we introduce
 >
->     successive approximations
+>   successive approximations
 >
 > a way to find a well-fitted `θ`.
 
@@ -350,7 +357,7 @@ learning 问题是根据数据集寻找模型参数，
 > `θ`. Since the loss shows us how far away we are from the
 > well-fitted `θ`, we use it as a guide for revising `θ`.
 
-```scheme
+```scheme dashed
 (define l2-loss
   (lambda (xs ys)
     (lambda (θ)
@@ -375,7 +382,7 @@ learning 问题是根据数据集寻找模型参数，
 
 把对 `line` 定义的 `l2-loss` 一般化：
 
-```scheme
+```scheme solid
 (define l2-loss
   (lambda (target)
     (lambda (xs ys)
@@ -421,7 +428,7 @@ learning 问题是根据数据集寻找模型参数，
 
 > This small scalar is known as the
 >
->     learning rate
+>   learning rate
 >
 > Since we use this scalar often, we have a special symbol
 > for it: `α`
@@ -436,7 +443,8 @@ learning 问题是根据数据集寻找模型参数，
 > different Greek letter.
 
 > **The Law of Revision**
->     (Initial Version)
+>   (Initial Version)
+>
 > new `θ[0]` = `θ[0]` − (`α` × rate of change of `loss`
 > with respect to `θ[0]`)
 
@@ -511,12 +519,12 @@ z = (x + y) * y
 
 > The rate of change that we have determined is the
 >
->     slope of the tangent
+>   slope of the tangent
 >
 > This slope has a different name so we don't confuse it
 > with `θ[0]`. It is known as the
 >
->     gradient
+>   gradient
 >
 > A gradient is a general way of understanding the rate of
 > change of a parameterized function with respect to _all_
@@ -525,7 +533,8 @@ z = (x + y) * y
 我们将会用自动微分算法实现一个 `gradient` 函数。
 
 ```meta-lisp
-(define-type parameters-t (list-t tensor-t))
+(define-type parameter-t tensor-t)
+(define-type parameters-t (list-t parameter-t))
 
 (claim gradient
   (-> (-> parameters-t scalar-t) parameters-t
@@ -576,13 +585,14 @@ z = (x + y) * y
 这叫做「梯度下降」。
 
 > **The Law of Revision**
->     (Final Version)
+>   (Final Version)
+>
 > new `θ[i]` = `θ[i]`
 >   − (`α` × rate of change of `loss` w.r.t. `θ[0]`)
 
 > This algorithm for finding parameters is known as
 >
->     optimization by gradient descent
+>   optimization by gradient descent
 >
 > Who knew sliding down a slippery slope would be this much
 > fun!
@@ -607,6 +617,7 @@ z = (x + y) * y
 - 方案 B：用 stack 来模拟 dynamic scope。
 
 > **The Rule of Hyperparameters**
+>
 > Every hyperparameter either is a scalar or has no value.
 
 ```scheme
@@ -770,6 +781,7 @@ target 包括：
 从而扩展了 data sets 和 parameters 的例子。
 
 > **The Rule of Data Sets**
+>
 > In a data set `(xs, ys)` both `xs` and `ys` must have the
 > same number of elements.  The elements of `xs`, however,
 > can have a different shape from the elements of `ys`.
@@ -798,10 +810,12 @@ target 包括：
 ```
 
 > **The Rule of Parameters**
->     (Final Version)
+>   (Final Version)
+>
 > Every parameter is a tensor.
 
 > **The Rule of θ**
+>
 > `θ` is a list of parameters
 > that can have different shapes.
 
@@ -927,9 +941,10 @@ tensor-2 是矩阵。
 > and then select the corresponding elements from `xs` and
 > `ys`. We refer to these random indices as
 >
->     _a batch of indices_
+>   _a batch of indices_
 
 > **The Rule of Batches**
+>
 > A batch of indices consists of random indices that are
 > natural numbers smaller than `(tlen t)`.
 
@@ -1002,13 +1017,14 @@ tensor-2 是矩阵。
 > This kind of gradient descent where the
 > objective function uses sampling is known as
 >
->     _stochastic gradient descent_
+>   _stochastic gradient descent_
 >
 > _Stochastic_ is another way of saying we use random
 > numbers to determine our results. Using _samples_ as part
 > of our objective function is what makes it stochastic.
 
 > **The Law of Batch Sizes**
+>
 > Each revision in stochastic gradient descent uses only a
 > batch of size `batch-size` from the data set and the ranks
 > of the tensors in the batch are the same as the ranks of
@@ -1016,7 +1032,82 @@ tensor-2 是矩阵。
 
 # 7: The Crazy “ates”
 
-抽出来一个 interface，为下一步做准备。
+这一章讨论一个关于如何组织代码的工程问题：
+即如何在 `revise` 的过程中，
+给每个 parameter 增加附加信息来辅助 `revise`。
+
+回顾 `gradient-descent`：
+
+```meta-lisp dashed
+(define-type objective-fn-t (-> parameters-t scalar-t))
+
+(claim gradient
+  (-> objective-fn-t parameters-t parameters-t))
+
+(claim gradient-descent
+  (-> objective-fn-t parameters-t parameters-t))
+
+(define gradient-descent
+  (lambda (obj θ)
+    (let ((f (lambda (Θ)
+               (map (lambda (p g)
+                      (− p (* α g)))
+                 Θ
+                 (gradient obj Θ)))))
+      (revise f revs θ))))
+```
+
+> One of the reasons why `gradient-descent` from frame 99:5
+> is unable to get to its well-fitted `θ` with fewer
+> revisions is because it has very little information to
+> work from.
+>
+> Before we get to the details of that, what matters here is
+> that we must find a way to hold this information and bring
+> it up to date as the parameter is revised.
+>
+> The first thing to remember is that this extra information
+> is associated with each parameter in `θ`.
+
+> **The Law of Revisions**
+>
+> As long as we make sure that `gradient-descent` accepts an
+> initial `θ` and results in a well-fitted `θ`, any
+> reasonable way of revising it from the first to the last
+> revision is okay.
+
+首先引入 accompanied parameter，
+用来保存对应于一个 parameter 的额外信息：
+
+> Whenever a parameter is wrapped in a list, we refer to it as
+>
+>   _an accompanied parameter_
+
+```scheme
+(list p1 p2 p3 ...)
+```
+
+改为：
+
+```scheme
+(list (list p1) (list p2) (list p3) ...)
+```
+
+未来可能有：
+
+```scheme
+(list (list p1 ...) (list p2 ...) (list p3 ...) ...)
+```
+
+这就是为什么在参数命名上要区分小写的 `θ` 代表 parameters，
+与大写的 `Θ` 代表 accompanied parameters。
+
+由于小写的 theta 到大写的 theta 像是「吹气球」，
+所以两个方向的转化函数分别叫做 "inflate" 和 "deflate"。
+
+注意这里在函数式语言中实现「接口」（interface）的方式，
+由于我们的语言中并没有 record 与 subtype，
+所以我们并没有真的定义一个 interface：
 
 ```js
 interface Representation {
@@ -1026,13 +1117,115 @@ interface Representation {
 }
 ```
 
+而是把每个接口函数作为普通参数，
+来在参数层面实现「依赖注入」（dependency injection）。
+
+由于函数可以 currying，
+所以这种实现方式用起来也是能在代码中体现意图的，
+即「这一组函数，属于一个接口」这个意图。
+并且，这样分散的参数传递是更灵活的。
+
+- 唯一的缺点就是「依赖参数顺序」，
+  当参数的数量很多时，我们需要能不依赖参数顺序来调用函数。
+  这个问题可以通过设计新语法来解决，
+  新语法可以专门处理「依赖参数顺序」问题。
+
+> We use these three functions
+>
+>     inflate deflate update
+>
+> to generalize `gradient-descent`.
+>
+> Rather than scattering the three “ates” throughout the
+> `gradient-descent`, we pass them to a more general
+> `gradient-descent`:
+
+```meta-lisp dashed
+(define gradient-descent
+  (lambda (inflate deflate update)
+    (lambda (obj θ)
+      (let ((f (lambda (Θ)
+                 (update
+                   Θ
+                   (gradient obj (deflate Θ))))))
+        (deflate
+          (revise f revs
+            (inflate θ)))))))
+```
+
+> We're going to simplify them.
+> To do that, let's consider something
+>
+>   crazy
+
+这里所说的 "crazy" 其实是一个 code smell，
+也就是发现这些接口函数中都重复调用了 `map`，
+应该把 `map` 抽出来，使得接口函数更简单：
+
+```meta-lisp solid
+(define gradient-descent
+  (lambda (inflate deflate update)
+    (lambda (obj θ)
+      (let ((f (lambda (Θ)
+                 (map update
+                   Θ
+                   (gradient obj
+                     (map deflate Θ))))))
+        (map deflate
+          (revise f revs
+            (map inflate θ)))))))
+```
+
+> **The Law of the Crazy “ates”**
+>
+> For any representation, the three “ates” are concerned
+> with only one parameter and its accompaniments, and are
+> not directly concerned with either `θ` or `Θ`.
+
+用函数类型来描述「接口」就是：
+
+```meta-lisp
+(define-type parameter-t tensor-t)
+(define-type parameters-t (list-t parameter-t))
+
+(define-type (accompanied-parameter-t A)
+  (pair-t parameter-t A))
+
+(define-type (inflate-fn-t A)
+  (-> parameter-t (accompanied-parameter-t A)))
+
+(define-type (deflate-fn-t A)
+  (-> (accompanied-parameter-t A) parameter-t))
+```
+
+这些函数其实是为 `update-fn-t` 服务的，
+目的是把：
+
+```meta-lisp
+(define-type update-fn-t
+  (-> parameter-t parameter-t
+      parameter-t))
+```
+
+转化为：
+
+- 第二个 `parameter-t` 参数为 gradient。
+
+```meta-lisp
+(define-type (update-fn-t A)
+  (-> (accompanied-parameter-t A) parameter-t
+      (accompanied-parameter-t A)))
+```
+
 # 8: The Nearer Your Destination, the Slower You Become
 
-上一章和这一章，完美的展示了，如何先把代码打开，然后在修改代码。
+上一章和这一章，完美的展示了，
+如何先把代码打开，然后在修改代码。
 
 > For each desired change,
 > make the change easy (warning: this may be hard),
 > then make the easy change.
+>
 > -- Kent Beck
 
 由于接近极值点的时候梯度太小了，
@@ -1149,6 +1342,7 @@ activation 来自神经网络的比喻，
 引入 relu 函数。
 
 > **The Rule of Artificial Neurons**
+>
 > An artificial neuron is a parameterized linear function
 > composed with a nonlinear decider function.
 
@@ -1184,12 +1378,14 @@ layer function 是特殊的 target function，
   We say that the width of this layer is `m`.
 
 > **The Law of Dense Layers**
->       (Initial Version)
+>     (Initial Version)
+>
 > A dense layer function invokes m neurons on an n-element
 > input tensor-1 and produces an m-element output tensor-1.
 
 > **The Law of Dense Layers**
->       (Final Version)
+>     (Final Version)
+>
 > A dense layer function invokes m neurons on an n-element
 > input tensor-1 that produces an m-element output tensor-1
 > in a single invocation of *-2-1.
@@ -1293,7 +1489,7 @@ He initialization for networks that use rectify:
 > vanishes.
 
 > **The Rule of Layer Initialization**
->          (Initial Version)
+>        (Initial Version)
 > The bias tensor-1 of a layer is initialized to contain only 0.0
 > The weight tensor-2 of a layer is initialized to random scalars
 > with a central value of 0.0 and a variance of 2/n where n is the
@@ -1343,7 +1539,8 @@ He initialization for networks that use rectify:
 
 > This way of testing different
 > combinations for the best one is known as
->     _grid search_.
+>
+>   _grid search_.
 
 尽管这里把 `grid-search` 定义为了一个语法关键词，
 但是也有用函数实现 `grid-search` 的方案，
