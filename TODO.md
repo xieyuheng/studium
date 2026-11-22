@@ -2,6 +2,10 @@
 项目 / 元语
 - x-lisp 方面，文档要足够指导用户安装和使用 meta-lisp
 
+# 深度学习
+
+~/study/persons/simon-j-d-prince/
+
 # 文学式编程
 
 [文学式编程] 关于读代码与写代码的研究
