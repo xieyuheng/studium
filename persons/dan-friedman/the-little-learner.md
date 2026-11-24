@@ -1162,6 +1162,10 @@ interface Representation {
 也就是发现这些接口函数中都重复调用了 `map`，
 应该把 `map` 抽出来，使得接口函数更简单：
 
+- 注意，尽管 `update` 函数简化为了针对某一个 parameter 而计算。
+  但是梯度 `gradient` 依然是就整个 parameters 计算的，
+  即 objective 函数对每个 parameter 的偏导数。
+
 ```meta-lisp solid
 (define gradient-descent
   (lambda (inflate deflate update)
@@ -1217,6 +1221,27 @@ interface Representation {
       (accompanied-parameter-t A)))
 ```
 
+这里可以看到，
+每个 `update` 函数在做更新的时候已经有更多信息了，
+扩展了 state passing 中的 state 的结构。
+
+例子：
+
+- `θ` 为 parameters，元素记为 `p`；
+- `Θ` 为 accompanied-parameter，元素记为 `P`。
+
+```scheme
+(define naked-i (lambda (p) (let ((P p)) P)))
+(define naked-d (lambda (P) (let ((p P)) p)))
+(define naked-u (lambda (P g) (let ((p P)) (- p (* α g)))))
+```
+
+```scheme
+(define lonely-i (lambda (p) (list p)))
+(define lonely-d (lambda (P) (ref P 0)))
+(define lonely-u (lambda (P g) (list (- (ref P 0) (* α g)))))
+```
+
 # 8: The Nearer Your Destination, the Slower You Become
 
 上一章和这一章，完美的展示了，
@@ -1228,11 +1253,60 @@ interface Representation {
 >
 > -- Kent Beck
 
-由于接近极值点的时候梯度太小了，
-这里的方案是去积累整个梯度下降路径上的梯度，
+由于接近极值点时梯度会逐渐减小到零，
+所以如果 learning rate 适合开始阶段的梯度下降，
+在接近极值点的时候，下降的速度就变慢了。
+
+> The change that we make to a given parameter at each
+> revision is known as the _velocity_ of descent.
+
+注意，velocity 作为 change 是「加」到 parameter 上的。
+「梯度下降」公式中的减号，应该被移到 velocity 中。
+
+这里的方案是去积累整个梯度下降路径上的 velocity，
 每次都乘上一个因子来减少积累的程度。
 
-这种梯度下降称为 momentum gradient descent。
+本章开头用「接力赛」中累积速度的比喻，
+来解释这个 velocity 累加的方案。
+
+> we should boost our velocity by adding some fraction `μ`
+> of the velocity `v`, of the previous revision, to the
+> change we expect to make in the current revision.
+
+```scheme
+(declare-hyper μ)
+```
+
+> The hyperparameter `μ` is between 0.0 and 1.0 and
+> represents the decimal fraction of the previous velocity
+> we want to retain for the next velocity.
+>
+> The recommended scalar for `μ` is usually about 0.9.
+
+由于我们抽出来了接口函数，
+所以实现新算法就是实现新接口：
+
+```scheme
+(define velocity-i (lambda (p) (list p (zeros p))))
+(define velocity-d (lambda (P) (ref P 0)))
+(define velocity-u
+  (lambda (P g)
+    (let ((v (- (* μ (ref P 1))
+                (* α g))))
+      (list (+ (ref P 0) v) v))))
+```
+
+> this form of gradient descent is known as
+>
+>  _momentum gradient descent_
+>
+> That's because we multiply the velocity `v` by a constant
+> `μ`. The resulting expression is analogous to the formula
+> of momentum in physics.
+
+用 meta-lisp 实现机器学习框架时，
+我们可以实现一些画图和动画函数，
+这样可以更直观地看到不同算法的效果。
 
 # Interlude IV: Smooth Operator
 
