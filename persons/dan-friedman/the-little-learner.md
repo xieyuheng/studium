@@ -1310,20 +1310,64 @@ interface Representation {
 
 # Interlude IV: Smooth Operator
 
-> So, smooth seems to be a way of
-> incorporating historical information that
-> is less relevant as we move forward.
+> Before we look at other update algorithms,
+> we must understand
+>
+>   _smoothing_
+
+```scheme
+(define smooth
+  (lambda (decay-rate average g)
+    (+ (* decay-rate average)
+       (* (− 1.0 decay-rate) g))))
+```
+
+> where `decay-rate` must always be a scalar between 0.0 and
+> 1.0, `average` is a historically-accumulated average, and
+> `g` is a gradient. Both `average` and `g` must be tensors
+> of the same shape.
+
+> Here are the original seven scalars from frame 4
+>
+>   50.3 22.7 4.3 2.7 1.8 2.2 0.6
+>
+> and the historical averages after they have all been
+> smoothed
+>
+>   5.03 6.8 6.55 6.16 6.07 5.64 5.14
+>
+> Compare the smoothed seven scalars to the original seven
+> scalars.
+>
+> The smoothed are much smoother than the original
+> scalars. In other words, the smoothed scalars don't vary
+> as much as the original scalars and the variations between
+> them are much gentler.
+>
+> Repeatedly invoking smooth over these scalars “averages”
+> out variations by blending historical scalars with newer
+> ones.
+
+decay-rate 0.9 的意思是：
+取 90% 历史平均值，以及新数的 10%，
+作为新的历史平均值。
+
+> We refer to `decay-rate` as the _rate of contribution_.
+> The contribution of earlier items decays as more items are
+> incorporated.
+
+> So, _smooth_ seems to be a way of incorporating historical
+> information that is less relevant as we move forward.
 
 # 9: Be Adamant
 
 > Because α (learning rate) represents the fraction of the
-> gradient we're going to use as our velocity,
-> another approach to addressing this
-> problem is to make this fraction _adaptive_.
+> gradient we're going to use as our velocity, another
+> approach to addressing this problem is to make this
+> fraction _adaptive_.
 
-> Adaptive here means that the fraction is
-> decided based on the gradient and its
-> historical values.
+> Adaptive here means that the fraction is decided based on
+> the gradient and its historical values.
 
 不用在纠结 `learningRate` 这个常数了，
 因为我们讲用历史数据类计算 `adaptiveLearningRate`。
