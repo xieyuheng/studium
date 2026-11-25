@@ -16,7 +16,8 @@ SICM 的目的在于，
 构拟经典力学的历史：
 
 - 初步地观察，使人们区分出空间与空间中的物体。
-- 人们观察到物体在运动，运动的规律被总结为物体之间有相互作用，并称之为力。
+- 人们观察到物体在运动，
+  运动的规律被总结为物体之间有相互作用，并称之为力。
 - 人们观察到的相同的力对不同物体的作用效果不同，
   人们引入质量这个物体万有的参数来度量这种不同的作用效果。
 
@@ -30,36 +31,45 @@ SICM 的目的在于，
         (render)))
 ```
 
+[2026-11-25] 在从 "The Little Learner" 学习机器学习的原理时，
+发现用来实现梯度下降的算法，真的是在模拟物理上的「滑滑梯」。
+
+看来在机器学习领域，很多算法的灵感来自物理知识与经验。
+
 # Preface
 
-> Classical mechanics is deceptively simple. It is surprisingly easy
-> to get the right answer with fallacious reasoning or without real
-> understanding. Traditional mathematical notation contributes to this
-> problem.  ... In order that the reasoning be clear and unambiguous,
-> we have adopted a more precise mathematical notation. Our notation
-> is functional and follows that of modern mathematical presentations.
+> Classical mechanics is deceptively simple. It is
+> surprisingly easy to get the right answer with fallacious
+> reasoning or without real understanding. Traditional
+> mathematical notation contributes to this problem.  ... In
+> order that the reasoning be clear and unambiguous, we have
+> adopted a more precise mathematical notation. Our notation
+> is functional and follows that of modern mathematical
+> presentations.
 
-> We require that our mathemathematical notations be explicit and
-> precise enough so that they can be interpreted automatically, as by
-> a computer.
+> We require that our mathemathematical notations be
+> explicit and precise enough so that they can be
+> interpreted automatically, as by a computer.
 
-> Computational algorithms are used to communicate precisely some of
-> the methods used in the analysis of dynamical phenomena. Expressing
-> the methods of variational mechanics in a computer language forces
-> them to be unambiguous and computationally effective. Computation
-> requires us to be precise about the representation of mechanical and
-> geometric notions as computational objects and permits us to
-> represent explicitly the algorithms for manipulating these
-> objects. Also, once formalized as a procedure, a mathematical idea
-> becomes a tool that can be used directly to compute results.
+> Computational algorithms are used to communicate precisely
+> some of the methods used in the analysis of dynamical
+> phenomena. Expressing the methods of variational mechanics
+> in a computer language forces them to be unambiguous and
+> computationally effective. Computation requires us to be
+> precise about the representation of mechanical and
+> geometric notions as computational objects and permits us
+> to represent explicitly the algorithms for manipulating
+> these objects. Also, once formalized as a procedure, a
+> mathematical idea becomes a tool that can be used directly
+> to compute results.
 
 # 1 Lagrangian Mechanics
 
-> The motion of a system can be described by giving the position of
-> every piece of the system at each moment.  Such a description of the
-> motion of the system is called a _configuration path_; the
-> configuration path specifies the configuration as a function of
-> time.
+> The motion of a system can be described by giving the
+> position of every piece of the system at each moment.
+> Such a description of the motion of the system is called a
+> _configuration path_; the configuration path specifies the
+> configuration as a function of time.
 
 ```scheme
 (define-class motion-system-t ()
@@ -70,61 +80,67 @@ SICM 的目的在于，
 例如 juggling pin：
 
 > The juggling pin rotates as it flies through the air; the
-> configuration of the juggling pin is specified by giving the
-> position and orientation of the pin. The motion of the juggling pin
-> is specified by giving the position and orientation of the pin as a
-> function of time.
+> configuration of the juggling pin is specified by giving
+> the position and orientation of the pin. The motion of the
+> juggling pin is specified by giving the position and
+> orientation of the pin as a function of time.
 
 对于 juggling pin 而言，
 configuration = position + orientation。
 
-> The function that we seek takes a configuration path as an input and
-> produces some output. We want this function to have some
-> characteristic behavior when the input is a realizable path. For
-> example, the output could be a number, and we could try to arrange
-> that the number is zero only on realizable paths. Newton's equations
-> of motion are of this form; at each moment Newton's differential
-> equations must be satisfied.
+> The function that we seek takes a configuration path as an
+> input and produces some output. We want this function to
+> have some characteristic behavior when the input is a
+> realizable path. For example, the output could be a
+> number, and we could try to arrange that the number is
+> zero only on realizable paths. Newton's equations of
+> motion are of this form; at each moment Newton's
+> differential equations must be satisfied.
 
-> However, there is a alternate strategy that provides more insight
-> and power: we could look for a path-distinguishing functionthat has
-> a minimum on the realizable paths -- on nearby unrealizable paths
-> the value of the function is higher than it is on the realizable
-> path. This is the _variational strategy_: for each physical system
-> we invent a path-distinguishing function that distinguishes
-> realizable motions of the system by having a _stationary point_
-> foreach realizable path. For a great variety of systems realizable
-> motions of the system can be formulated in terms of a variational
-> principle.
+> However, there is a alternate strategy that provides more
+> insight and power: we could look for a path-distinguishing
+> functionthat has a minimum on the realizable paths -- on
+> nearby unrealizable paths the value of the function is
+> higher than it is on the realizable path. This is the
+> _variational strategy_: for each physical system we invent
+> a path-distinguishing function that distinguishes
+> realizable motions of the system by having a _stationary
+> point_ foreach realizable path. For a great variety of
+> systems realizable motions of the system can be formulated
+> in terms of a variational principle.
 
 两个函数如果都是 stationary point，
 那么它们的线性组合显然也是 stationary point。
 
-> In the Newtonian formulation the forces can often be written as
-> derivatives of the potential energy of the system. The motion of the
-> system is determined by considering how the individual component
-> particles respond to these forces. The Newtonian formulation of the
-> equations of motion is intrinsically a particle-by-particle
-> description.
+> In the Newtonian formulation the forces can often be
+> written as derivatives of the potential energy of the
+> system. The motion of the system is determined by
+> considering how the individual component particles respond
+> to these forces. The Newtonian formulation of the
+> equations of motion is intrinsically a
+> particle-by-particle description.
 
 > In the variational formulation the equations of motion are
-> formulated in terms of the difference of the kinetic energy and the
-> potential energy. The potential energy is a number that is
-> characteristic of the arrangement of the particles in the system;
-> the kinetic energy is a number that is determined by the velocities
-> of the particles in the system. Neither the potential energy nor the
-> kinetic energy depend on how those positions and velocities are
-> specified. The difference is characteristic of the system as a whole
-> and does not depend on the details of how the system is specified.
-> So we are free to choose ways of describing the system that are easy
-> to work with; we are liberated from the particle-by-particle
-> description inherent in the Newtonian formulation.
+> formulated in terms of the difference of the kinetic
+> energy and the potential energy. The potential energy is a
+> number that is characteristic of the arrangement of the
+> particles in the system; the kinetic energy is a number
+> that is determined by the velocities of the particles in
+> the system. Neither the potential energy nor the kinetic
+> energy depend on how those positions and velocities are
+> specified. The difference is characteristic of the system
+> as a whole and does not depend on the details of how the
+> system is specified.  So we are free to choose ways of
+> describing the system that are easy to work with; we are
+> liberated from the particle-by-particle description
+> inherent in the Newtonian formulation.
 
 ## 1.1 The Principle of Stationary Action
 
 > Let us suppose that for each physical system there is a
-> path-distinguishing function that is stationary on realizable
-> paths. We will try to deduce some of its properties.
+> path-distinguishing function that is stationary on
+> realizable paths. We will try to deduce some of its
+> properties.
 
 通过我们对运动的直觉，推导出 path-distinguishing function。
 能熟练地重复这里的推导过程，就算是学会这一节了。
@@ -169,27 +185,27 @@ configuration = position + orientation。
 这里的注释是：
 
 > We suspect that this argument can be promoted to a precise
-> constraint on the possible ways of making this path-distinguishing
-> function.
+> constraint on the possible ways of making this
+> path-distinguishing function.
 
 也许确实如此，可以模仿 William Lawvere 在证明 Brouwer 定理时，
 原地构造了一个 category 的方式，来处理这里的推理。
 
-> So we will try to arrange that the path-distinguishing function,
-> constructed as an integral of a local property along the path,
-> assumes an extreme value for any realizable path. Such a
-> path-distinguishing function is traditionally called an _action_ for
-> the system.
+> So we will try to arrange that the path-distinguishing
+> function, constructed as an integral of a local property
+> along the path, assumes an extreme value for any
+> realizable path. Such a path-distinguishing function is
+> traditionally called an _action_ for the system.
 
 ```
 action := path-distinguishing function
 ```
 
-> In order to pursue the agenda of variational mechanics, we must
-> invent action functions that are stationary on the realizable
-> trajectories of the systems we are studying. We will consider
-> actions that are integrals of some local property of the
-> configuration path at each moment.
+> In order to pursue the agenda of variational mechanics, we
+> must invent action functions that are stationary on the
+> realizable trajectories of the systems we are studying. We
+> will consider actions that are integrals of some local
+> property of the configuration path at each moment.
 
 > Let `γ` be the configuration-path function;
 
@@ -221,15 +237,15 @@ action := path-distinguishing function
   (definite-integral (F γ) t1 t2))
 ```
 
-> where `F[γ]` is a function of time that measures some local
-> property of the path. It may depend upon the value of the function
-> `γ` at that time and the value of any derivatives of `γ` at that
-> time.
+> where `F[γ]` is a function of time that measures some
+> local property of the path. It may depend upon the value
+> of the function `γ` at that time and the value of any
+> derivatives of `γ` at that time.
 
-> Traditionally, square brackets are put around functional arguments.
-> In this case, the square brackets remind us that the value of `S`
-> may depend on the function `γ` in complicated ways, such as
-> through its derivatives.
+> Traditionally, square brackets are put around functional
+> arguments.  In this case, the square brackets remind us
+> that the value of `S` may depend on the function `γ` in
+> complicated ways, such as through its derivatives.
 
 TODO
 

@@ -1304,6 +1304,9 @@ interface Representation {
 > `μ`. The resulting expression is analogous to the formula
 > of momentum in physics.
 
+目前，为了测试这些学习算法确实能加快学习速度，
+是通过调整 revision 次数 `revs` 来做测试的。
+
 用 meta-lisp 实现机器学习框架时，
 我们可以实现一些画图和动画函数，
 这样可以更直观地看到不同算法的效果。
@@ -1413,9 +1416,7 @@ v(t+1) = μ * v(t) - α * ∇f(p(t))
 问题 3：为什么说「动量」的概念，
 蕴含了「速度不应该瞬间改变」这一点？
 
-因为物理里的「动量」
-不是「记录一下过去梯度的加权和」这么弱的说法，
-它背后是一个「状态量 + 惯性」的结构：
+因为物理里的「动量」是一个「状态量 + 惯性」的结构：
 动量 `p = m * v` 是物体运动状态的一部分，
 而力改变的是动量的变化率，不是直接指定速度。
 
@@ -1485,28 +1486,186 @@ decay-rate 0.9 的意思是：
 
 # 9: Be Adamant
 
+> The velocity-based update algorithm from frame 149:21
+> improves the velocity of a revision by borrowing some
+> velocity from the preceding revision.
+
+上一章的算法利用「惯性」与「滑滑梯」模型。
+
+> But there are other ways to improve the velocity of a
+> revision. These algorithms work by modifying the fraction
+> of the gradient used at each revision.
+
+这一章要在 learning rate 上做文章，
+也就是这里所说的 "fraction"。
+
+问题：这一章的算法是否也与某个物理模型相对应？
+
 > Because α (learning rate) represents the fraction of the
 > gradient we're going to use as our velocity, another
 > approach to addressing this problem is to make this
 > fraction _adaptive_.
-
+>
 > Adaptive here means that the fraction is decided based on
 > the gradient and its historical values.
 
-不用在纠结 `learningRate` 这个常数了，
-因为我们讲用历史数据类计算 `adaptiveLearningRate`。
+gradient 的历史决定 learning rate，
+应该如何决定呢？
+就是使用 gradient「历史平方平均数」的倒数，
+也就是平方（为了取正数）的「历史平均值」的平方根的倒数。
 
-并且可以把这里修改 `learningRate` 的技巧，
+也就是要调用上一个 interlude 的 `smooth` 函数，
+因此需要一个新的 hyperparameter 代表 decay rate：
+
+```scheme
+(declare-hyper β)
+```
+
+```scheme
+(define rms-i (lambda (p) (list p (zeros p))))
+(define rms-d (lambda (P) (ref P 0)))
+(define rms-u
+  (lambda (P g)
+    (let ((r (smooth β (ref P 1) (square g))))
+      (let ((α (÷ α (+ (square-root r) ϵ))))
+        (list (- (ref P 0) (* α g)) r)))))
+```
+
+其中，`ϵ` 是为了避免 0 做除数的 _stabilizer_。
+
+我们还是需要起始的 `learning-rate` 这个常数，
+但是不用再纠结它的取值了，
+因为我们将用历史数据来计算 `adaptive-learning-rate`。
+
+> This version of gradient-descent has the somewhat cryptic name _RMSProp_.
+>
+> The term _RMS_ stands for _root mean square_, which
+> reflects the fact that we use the _mean_ (i.e., the
+> smoothed historical average) of the _squares_ and then
+> take its _square root_. The suffix Prop is a contraction
+> of the term _back propagation_.
+
+并且可以把这里修改 `learning-rate` 的技巧，
 和前一章的 momentum gradient descent 结合起来用，
 得到 ADMA 算法。
 
-> NOTE ADAM is short for adaptive moment estimation.
-> The accompaniment `v` is known as
-> the gradient's 1st moment and `r` its 2nd moment.
+```scheme
+(define adam-i
+  (lambda (p)
+    (let ((v (zeros p)))
+      (let ((r v))
+        (list p v r)))))
+(define adam-d (lambda (P) (ref P 0)))
+(define adam-u
+  (lambda (P g)
+    (let ((r (smooth β (ref P 2) (square g))))
+      (let ((α (÷ α (+ (square-root r) ϵ)))
+            (v (smooth μ (ref P 1) g)))
+        (list (- (ref P 0) (* α v)) v r)))))
+```
 
-注意，
-这里两个算法的复合并没有那么优雅了，
-必须要修改算法定义的细节才能做到。
+> The name of this algorithm, Adam, is short for _adaptive
+> moment estimation_.  It is _adaptive_ because it uses an
+> adaptive learning rate.
+>
+> The accompaniment `v` is known as the gradient's 1st
+> moment and `r` its 2nd moment.
+
+> **The Law of Gradient Descent**
+>
+> The `θ` for a target function is learned by using one of
+> the gradient descent functions.
+
+# 笔记：继续追问物理类比
+
+回答上一章开头的疑问：
+这一章的算法 RMSProp 和 ADAM，
+是否也与某个物理模型相对应？
+
+momentum gradient descent：
+对应带惯性/阻尼的粒子在势能面中运动。
+
+RMSProp：
+没有显式速度状态，
+更像过阻尼粒子 + 随时间/方向变化的自适应阻尼。
+
+> 粒子在势能面中运动，受到的负梯度是力；
+> 但这个介质的阻力不是常数，
+> 而是根据该方向最近受力幅度的历史调整。
+> 力持续很大时，阻力增大、步长减小；
+> 力很小时，阻力减小、步长相对增大。
+
+RMSProp 相当于一个过阻尼粒子，
+其阻力系数正比于最近梯度幅值的 RMS。
+
+Adam：
+可以类比为同时带惯性和自适应阻尼/质量的粒子，
+但这里的 "moment" 是统计矩，不是物理动量；
+这个物理模型是构造出来的类比，不是算法的直接来源。
+
+- momentum = 物理里的「动量/惯性」；
+- moment = 统计里的「矩」。
+
+「统计矩」是统计学中与随机变量相关的概念。
+
+比如：
+
+- 一阶原点矩：`E[X]`，就是均值；
+- 二阶原点矩：`E[X^2]`，就是均方值；
+- 方差是中心二阶矩：`E[(X − EX)^2]`。
+
+「矩」是描述一个分布的特征量：
+均值描述中心位置，
+均方描述幅度/尺度。
+
+把当前梯度 `g(t)` 看成一个随训练过程变化的随机量，
+Adam 维护两个指数滑动平均：
+
+```math
+v(t) = smooth(μ, v(t-1), g(t))
+r(t) = smooth(β, r(t-1), g(t)^2)
+```
+
+它们分别近似：
+
+```math
+v(t) ≈ E[g(t)]
+r(t) ≈ E[g(t)^2]
+```
+
+所以：
+
+- `v` 是梯度的一阶矩估计，即梯度的平滑均值，
+  表示「最近梯度大致朝哪、有多大」；
+- `r` 是梯度平方的二阶矩估计，即梯度的平滑均方，
+  表示「最近梯度的典型幅度平方」。
+
+更新时用 `v` 除以 `r` 的平方根，
+也就是用一阶矩给方向，用二阶矩给尺度归一化。
+
+- 「归一化」可以让我们避免在梯度整体变大或变小时，
+  调整 learning rate 这个超参数。
+
+它之所以有「惯性」效果，
+是因为用了指数滑动平均，
+保留了历史信息；
+但「一阶矩」这个名字来自统计，不来自物理。
+
+
+利用 Hessian 矩阵（精确曲率），
+牛顿法这类二阶优化算法，
+可以直接计算出理想的更新步长：
+
+```math
+ϵ = −H^−1 ∇f(x)
+```
+
+理论上能更快地直达局部最小值。
+
+可以理解为 RMSProp 和 Adam 方法，
+用了一个非常粗略的近似来代替真正的 Hessian 矩阵。
+
+- https://chat.deepseek.com/share/vdszu1cyzh8rg4pixp
 
 # Interlude V: Extensio Magnifico!
 
