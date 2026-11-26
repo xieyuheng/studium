@@ -1737,6 +1737,27 @@ r(t) ≈ E[g(t)^2]
         (tensor-t (shape (* m n))))))
 ```
 
+而 `tmap` 的类型可以表达为：
+
+```meta-lisp
+(claim tmap
+  (forall* ((n nat-t) (s1 shape-t) (s2 shape-t))
+    (-> (-> (tensor-t s1) (tensor-t s2))
+        (tensor-t (cons n s1))
+        (tensor-t (cons n s2)))))
+```
+
+`ext1` 的类型可以表达为：
+
+```meta-lisp
+(claim ext1
+  (forall* ((s1 shape-t) (s2 shape-t))
+    (-> (-> (tensor-t s1) (tensor-t s2))
+        (forall* ((u shape-t))
+          (-> (tensor-t (append u s1))
+              (tensor-t (append u s2)))))))
+```
+
 用 `ext1` 扩展 `flatten-2`：
 
 ```scheme
@@ -1850,6 +1871,22 @@ r(t) ≈ E[g(t)^2]
 
 改善：也许，应该不要有这种特殊处理，
 而是分出来两个行为不同的 `ext2` 函数。
+
+最简单的有 `ext2` 函数是：
+
+- 这是一种 extra shape `u` 相同的 `ext2`，
+  只用到了 desc 的第三个 clause，
+  即调用 `tmap-2` 的 clause。
+
+```meta-lisp
+(claim ext2
+  (forall* ((s1 shape-t) (s2 shape-t) (s3 shape-t))
+    (-> (-> (tensor-t s1) (tensor-t s2) (tensor-t s3))
+        (forall* ((u shape-t))
+          (-> (tensor-t (append u s1))
+              (tensor-t (append u s2))
+              (tensor-t (append u s3)))))))
+```
 
 使用这里的 `ext2` 的例子：
 
