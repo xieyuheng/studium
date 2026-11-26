@@ -1665,15 +1665,56 @@ r(t) ≈ E[g(t)^2]
 可以理解为 RMSProp 和 Adam 方法，
 用了一个非常粗略的近似来代替真正的 Hessian 矩阵。
 
-- https://chat.deepseek.com/share/vdszu1cyzh8rg4pixp
+参考：
+
+- [DeepSeek / 关于机器学习的物理模型](https://chat.deepseek.com/share/vdszu1cyzh8rg4pixp)
 
 # Interlude V: Extensio Magnifico!
 
 这里学习如何实现 extended functions。
 
-我不理解为什么不用函数复合，
-而是重新从头定义 `of-rank?` 之类的函数。
-是为了优化？难道经过测试这里的函数是瓶颈？
+判断 rank 的辅助函数：
+
+```meta-lisp
+(claim of-rank? (-> int-t tensor-t bool-t))
+(define of-rank?
+  (lambda (n t)
+    (cond
+      ((zero? n) (scalar? t))
+      ((scalar? t) #f)
+      (else (of-rank? (sub1 n) (tref t 0))))))
+```
+
+> ... when extending a function `f`, we must also accept its
+> _base rank_ `n` as an argument.
+
+```meta-lisp
+(claim ext1
+  (-> (-> tensor-t tensor-t) int-t
+      (-> tensor-t tensor-t)))
+(define ext1
+  (lambda (f n)
+    (lambda (t)
+      (cond
+        ((of-rank? n t) (f t))
+        (else (tmap (ext1 f n) t))))))
+```
+
+使用 `ext1` 来扩展固定 base rank 的函数：
+
+```scheme
+(define square-root (ext1 square-root-0 0))
+(define zeros (ext1 (lambda (x) 0.0) 0))
+(define sum (ext1 sum-1 1))
+```
+
+注意，我们没法在类型系统中表达 tensor 的 shape 和 rank，
+因此 `square-root` `sum-1` 这些函数，
+都会在输入 tensor 的 rank 不匹配时报错。
+
+问题：如果有 dependent type，
+可否在类型系统中表达 tensor 的 shape？
+
 
 我在实现这里的 `extend1` 和 `extend2` 时，
 没有先看这章，但是我只是实现了对 Scalar 函数的 extend，
