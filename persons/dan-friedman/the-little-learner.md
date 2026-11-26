@@ -1671,7 +1671,7 @@ r(t) ≈ E[g(t)^2]
 
 # Interlude V: Extensio Magnifico!
 
-这里学习如何实现 extended functions。
+这一章学习如何实现就 tensor 的 rank 而言的 extended functions。
 
 判断 rank 的辅助函数：
 
@@ -1700,6 +1700,17 @@ r(t) ≈ E[g(t)^2]
         (else (tmap (ext1 f n) t))))))
 ```
 
+> The function `tmap` takes a function `f` and a tensor `t`
+> as arguments, and invokes `f` on every element of `t` and
+> assembles the results into a tensor.
+
+```meta-lisp
+(claim tmap
+  (-> (-> tensor-t tensor-t)
+      tensor-t
+      tensor-t))
+```
+
 使用 `ext1` 来扩展固定 base rank 的函数：
 
 ```scheme
@@ -1715,55 +1726,181 @@ r(t) ≈ E[g(t)^2]
 问题：如果有 dependent type，
 可否在类型系统中表达 tensor 的 shape？
 
+也许在 dependent type 中，
+`flatten-2` 的类型可以表达为：
 
-我在实现这里的 `extend1` 和 `extend2` 时，
-没有先看这章，但是我只是实现了对 Scalar 函数的 extend，
-这里实现了对任意 base rank 的函数 extend，
-技巧就是把 base rank 作为参数传进来。
-
-```typescript
-const mul21 = extend2(mul, 2, 1)
+```meta-lisp
+(claim flatten-2
+  (forall* ((m int-t)
+            (n int-t))
+    (-> (tensor-t (shape m n))
+        (tensor-t (shape (* m n))))))
 ```
 
-`mul21` 与 `mul` 作用于两个 rank 为 2 的 Tensor 的效果并不一样，
-`mul21` 可以用来实现 matrix-vector multiplication。
+用 `ext1` 扩展 `flatten-2`：
 
-注意，对于 `extend2` 之类的高阶 tensor 函数，
-只有当考虑 tensor 的 shape 的时候，
-其类型才能有效地约束函数的范围。
-
-比如：
-
-```cicada
-mul21: ([m, n], [n]) -> [m, n]
-mul21: ([a, m, n], [n]) -> [a, m, n]
-mul21: ([m, n], [b, n]) -> [b, m, n]
-
-// 由于 extend2 的定义中两个参数 rank 相等时，
-// 被特殊处理为 zip + map 了，
-// 这也许是不合理的，因为下面两个作用返回的 shape 一样了。
-mul21: ([a, m, n], [a, b, n]) -> [a, b, m, n]
-mul21: ([a, m, n], [b, n]) -> [a, b, m, n]
-// 也许应该要求相对于两个 base rank 的 extra rank 相等时，
-// 才使用 zip + map，从而达到下面的效果：
-mul21: ([a, m, n], [a, n]) -> [a, m, n]
-// 而按照当前的定义，我们将得到：
-mul21: ([a, m, n], [a, n]) -> [a, a, m, n]
+```scheme
+(define flatten (ext1 flatten-2 2))
 ```
 
-TODO 用 dependent type 描述 `extend2` 的类型将会是很有趣的挑战。
+为了实现二元函数的扩展函数 `ext2`，
+还需要一些辅助函数：
 
-```cicada
-claim extend2: (
-  fn: (
-    Tensor(firstShape),
-    Tensor(secondShape),
-  ) -> Tensor(resultShape)
-) -> (
-  Tensor(???),
-  Tensor(???),
-) -> Tensor(???)
+```meta-lisp
+(claim rank>
+  (-> tensor-t tensor-t
+      bool-t))
+(define rank>
+  (lambda (t u)
+    (cond
+      ((scalar? t) #f)
+      ((scalar? u) #t)
+      (else (rank> (tref t 0) (tref u 0))))))
+
+(claim of-ranks?
+  (-> int-t tensor-t
+      int-t tensor-t
+      bool-t))
+(define of-ranks?
+  (lambda (n t m u)
+    (cond
+      ((of-rank? n t) (of-rank? m u))
+      (else #f))))
 ```
+
+> Now, we're ready to define `ext2`.
+>
+> It is similar in its basic structure to `ext1`, but
+> because the base function that is being extended has two
+> arguments instead of one, we need _two_ base ranks
+
+```meta-lisp
+(claim ext2
+  (-> (-> tensor-t tensor-t tensor-t) int-t int-t
+      (-> tensor-t tensor-t tensor-t)))
+(define ext2
+  (lambda (f n m)
+    (lambda (t u)
+      (cond
+        ((of-ranks? n t m u) (f t u))
+        (else
+         (desc (ext2 f n m) n t m u))))))
+```
+
+`desc` 是 "descend into tensor" 的意思：
+
+```meta-lisp
+(claim desc
+  (-> (-> tensor-t tensor-t tensor-t)
+      int-t tensor-t
+      int-t tensor-t
+      tensor-t))
+(defien desc
+  (lambda (g n t m u)
+    ;; (shape T...) (shape S... U...) ->
+    ;; (shape S... T... U...)
+    ((of-rank? n t) (desc-u g t u))
+    ;; (shape S... T...) (shape U...) ->
+    ;; (shape S... T... U...)
+    ((of-rank? m u) (desc-t g t u))
+    ;; (shape L T...) (shape L U...) ->
+    ;; (shape L T... U...)
+    ;; - 这一步是一个特殊的对 shape 中具体 tlen
+    ;;;  的 pattern match。
+    ((eq? (tlen t) (tlen u)) (tmap-2 g t u))
+    ;; (shape S... R1...) (shape R2...) ->
+    ;; (shape S... R1... R2...)
+    ;; - R1... 和 R2... 长度相等。
+    ((rank> t u) (desc-t g t u))
+    ;; (shape R1...) (shape S... R2...) ->
+    ;; (shape S... R1... R2...)
+    ;; - R1... 和 R2... 长度相等。
+    (else (desc-u g t u))))
+
+(claim desc-t
+  (-> (-> tensor-t tensor-t tensor-t)
+      tensor-t tensor-t
+      tensor-t))
+(define desc-t
+  (lambda (g t u)
+    (tmap (lambda (et) (g et u)) t)))
+
+(claim desc-u
+  (-> (-> tensor-t tensor-t tensor-t)
+      tensor-t tensor-t
+      tensor-t))
+(define desc-u
+  (lambda (g t u)
+    (tmap (lambda (eu) (g t eu)) u)))
+```
+
+其中 `tmap-2` 类似于 `tmap`：
+
+```meta-lisp
+(claim tmap-2
+  (-> (-> tensor-t tensor-t tensor-t)
+      tensor-t tensor-t
+      tensor-t))
+```
+
+这里 `desc` 的定义是很特殊的，
+其中所有 clause 都是判断 rank，
+只有第三个 clause 判断 `tlen`，
+这可能只是为了 `dot-product-1-1` 可以被正确扩展。
+
+改善：也许，应该不要有这种特殊处理，
+而是分出来两个行为不同的 `ext2` 函数。
+
+使用这里的 `ext2` 的例子：
+
+```scheme
+(define + (ext2 +-0-0 0 0))
+(define * (ext2 *-0-0 0 0))
+(define dot-product (ext2 dot-product-1-1 1 1))
+```
+
+> We can use `ext2` in other ways. For example, we can
+> define a function `*-2-1`
+
+```scheme
+(define *-2-1 (ext2 * 2 1))
+```
+
+`*-2-1` 是 matrix-vector multiplication。
+
+> We're using different base ranks. This means that `*-2-1`
+> descends into both its arguments until it has reached a
+> tensor-2 in its first argument, and a tensor-1 in its
+> second argument, and then invokes `*` only on them.
+
+比如下面观察 `*-2-1` 对 shape 的影响：
+
+- 可以发现，情况是非常复杂的，
+  是依赖于 `desc` 的具体定义的。
+  这种复杂的情况可能应该被避免，
+  所以我们也许应该直接用针对特殊 rank 的 tensor 函数。
+
+```meta-lisp
+(shape m n) (shape n) -> (shape m n)
+(shape a m n) (shape n) -> (shape a m n)
+(shape m n) (shape b n) -> (shape b m n)
+
+;; 由于 `desc` 的定义中的第三个 tlan 相关的 clause，
+;; 我们会有下面的（也许是不合理的）结果：
+(shape a m n) (shape a b n) -> (shape a b m n)
+(shape a m n) (shape b n) -> (shape a b m n)
+
+;; 也许应该要求相对于两个 base rank 的 extra rank 相等时，
+;; 才使用 tmap-2，从而达到下面的效果：
+(shape a m n) (shape a n) -> (shape a m n)
+
+;; 而按照当前的定义，我们将得到：
+(shape a m n) (shape a n) -> (shape a a m n)
+```
+
+问题：可否用 dependent type 给这一章中出现的，
+动态性很强的函数以类型？
+比如 `tmap` `tmap-2` `ext1` `ext2`。
 
 # 10: Doing the Neuron Dance
 
